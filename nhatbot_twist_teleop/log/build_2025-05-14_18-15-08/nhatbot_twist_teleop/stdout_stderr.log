@@ -1,0 +1,21 @@
+[35m[1mConsolidate compiler generated dependencies of target twist_relay[0m
+[35m[1mConsolidate compiler generated dependencies of target joy_to_twist[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/joy_to_twist.dir/src/joy_to_twist.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/twist_relay.dir/src/twist_relay.cpp.o[0m
+[01m[K/home/liemtran/liem_ws/src/nhatbot_twist_teleop/src/twist_relay.cpp:[m[K In constructor ‘[01m[KTwistRelay::TwistRelay()[m[K’:
+[01m[K/home/liemtran/liem_ws/src/nhatbot_twist_teleop/src/twist_relay.cpp:10:9:[m[K [01;31m[Kerror: [m[K‘[01m[KTwist_mux[m[K’ was not declared in this scope
+   10 |         [01;31m[KTwist_mux[m[K and Controller
+      |         [01;31m[K^~~~~~~~~[m[K
+[01m[K/home/liemtran/liem_ws/src/nhatbot_twist_teleop/src/twist_relay.cpp:10:23:[m[K [01;31m[Kerror: [m[K‘[01m[KController[m[K’ was not declared in this scope; did you mean ‘[01m[Kcontroller_sub_[m[K’?
+   10 |         Twist_mux and [01;31m[KController[m[K
+      |                       [01;31m[K^~~~~~~~~~[m[K
+      |                       [32m[Kcontroller_sub_[m[K
+[01m[K/home/liemtran/liem_ws/src/nhatbot_twist_teleop/src/twist_relay.cpp:15:9:[m[K [01;31m[Kerror: [m[K‘[01m[KJoystick[m[K’ was not declared in this scope
+   15 |         [01;31m[KJoystick[m[K and Twist_mux
+      |         [01;31m[K^~~~~~~~[m[K
+gmake[2]: *** [CMakeFiles/twist_relay.dir/build.make:76: CMakeFiles/twist_relay.dir/src/twist_relay.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:165: CMakeFiles/twist_relay.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+[ 75%] [32m[1mLinking CXX executable joy_to_twist[0m
+[ 75%] Built target joy_to_twist
+gmake: *** [Makefile:146: all] Error 2

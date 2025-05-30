@@ -1,0 +1,2 @@
+Invoking command in '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop -- -j16 -l16
+Invoked command in '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop -- -j16 -l16

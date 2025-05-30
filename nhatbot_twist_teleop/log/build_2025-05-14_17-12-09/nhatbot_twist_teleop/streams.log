@@ -1,0 +1,78 @@
+[0.007s] Invoking command in '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/liemtran/liem_ws/src/nhatbot_twist_teleop -DCMAKE_INSTALL_PREFIX=/home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop
+[0.052s] -- The C compiler identification is GNU 11.4.0
+[0.091s] -- The CXX compiler identification is GNU 11.4.0
+[0.097s] -- Detecting C compiler ABI info
+[0.153s] -- Detecting C compiler ABI info - done
+[0.157s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.158s] -- Detecting C compile features
+[0.158s] -- Detecting C compile features - done
+[0.159s] -- Detecting CXX compiler ABI info
+[0.222s] -- Detecting CXX compiler ABI info - done
+[0.228s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.228s] -- Detecting CXX compile features
+[0.229s] -- Detecting CXX compile features - done
+[0.233s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.353s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.423s] -- Found rclpy: 3.3.16 (/opt/ros/humble/share/rclpy/cmake)
+[0.425s] -- Found rclcpp: 16.0.12 (/opt/ros/humble/share/rclcpp/cmake)
+[0.459s] -- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.464s] -- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.470s] -- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.479s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.490s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.528s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.531s] -- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[0.612s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[0.662s] -- Found FastRTPS: /opt/ros/humble/include  
+[0.695s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[0.708s] -- Looking for pthread.h
+[0.765s] -- Looking for pthread.h - found
+[0.765s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[0.826s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[0.826s] -- Found Threads: TRUE  
+[0.862s] -- Found sensor_msgs: 4.8.0 (/opt/ros/humble/share/sensor_msgs/cmake)
+[0.883s] -- Found ament_lint_auto: 0.12.12 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[0.947s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[0.947s] -- Configured cppcheck include dirs: 
+[0.947s] -- Configured cppcheck exclude dirs and/or files: 
+[0.948s] -- Added test 'flake8' to check Python code syntax and style conventions
+[0.949s] -- Added test 'lint_cmake' to check CMake code style
+[0.950s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[0.953s] -- Added test 'uncrustify' to check C / C++ code style
+[0.953s] -- Configured uncrustify additional arguments: 
+[0.953s] -- Added test 'xmllint' to check XML markup files
+[0.955s] -- Configuring done
+[0.963s] -- Generating done
+[0.966s] -- Build files have been written to: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop
+[0.973s] Invoked command in '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/liemtran/liem_ws/src/nhatbot_twist_teleop -DCMAKE_INSTALL_PREFIX=/home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop
+[0.974s] Invoking command in '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop -- -j16 -l16
+[1.012s] [ 50%] [32mBuilding CXX object CMakeFiles/twist_relay.dir/src/twist_relay.cpp.o[0m
+[1.012s] [ 50%] [32mBuilding CXX object CMakeFiles/joy_to_twist.dir/src/joy_to_twist.cpp.o[0m
+[6.471s] [ 75%] [32m[1mLinking CXX executable joy_to_twist[0m
+[6.729s] [ 75%] Built target joy_to_twist
+[8.291s] [100%] [32m[1mLinking CXX executable twist_relay[0m
+[8.644s] [100%] Built target twist_relay
+[8.656s] Invoked command in '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop -- -j16 -l16
+[8.665s] Invoking command in '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop
+[8.670s] -- Install configuration: ""
+[8.670s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/lib/nhatbot_twist_teleop/joy_to_twist.py
+[8.670s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/lib/nhatbot_twist_teleop/joy_to_twist
+[8.672s] -- Set runtime path of "/home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/lib/nhatbot_twist_teleop/joy_to_twist" to ""
+[8.672s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/lib/nhatbot_twist_teleop/twist_relay
+[8.675s] -- Set runtime path of "/home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/lib/nhatbot_twist_teleop/twist_relay" to ""
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/ament_index/resource_index/package_run_dependencies/nhatbot_twist_teleop
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/ament_index/resource_index/parent_prefix_path/nhatbot_twist_teleop
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/environment/ament_prefix_path.sh
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/environment/ament_prefix_path.dsv
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/environment/path.sh
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/environment/path.dsv
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/local_setup.bash
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/local_setup.sh
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/local_setup.zsh
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/local_setup.dsv
+[8.675s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/package.dsv
+[8.676s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/ament_index/resource_index/packages/nhatbot_twist_teleop
+[8.676s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/cmake/nhatbot_twist_teleopConfig.cmake
+[8.676s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/cmake/nhatbot_twist_teleopConfig-version.cmake
+[8.676s] -- Installing: /home/liemtran/liem_ws/src/nhatbot_twist_teleop/install/nhatbot_twist_teleop/share/nhatbot_twist_teleop/package.xml
+[8.678s] Invoked command in '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop

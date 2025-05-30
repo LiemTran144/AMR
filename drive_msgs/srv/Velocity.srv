@@ -1,0 +1,7 @@
+# Request
+float32 left
+float32 right
+---
+# Response
+float32 fb_left
+float32 fb_right

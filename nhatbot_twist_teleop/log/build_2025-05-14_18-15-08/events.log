@@ -1,0 +1,82 @@
+[0.000000] (-) TimerEvent: {}
+[0.000526] (nhatbot_twist_teleop) JobQueued: {'identifier': 'nhatbot_twist_teleop', 'dependencies': OrderedDict()}
+[0.000570] (nhatbot_twist_teleop) JobStarted: {'identifier': 'nhatbot_twist_teleop'}
+[0.006409] (nhatbot_twist_teleop) JobProgress: {'identifier': 'nhatbot_twist_teleop', 'progress': 'cmake'}
+[0.007319] (nhatbot_twist_teleop) JobProgress: {'identifier': 'nhatbot_twist_teleop', 'progress': 'build'}
+[0.008002] (nhatbot_twist_teleop) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop', '--', '-j16', '-l16'], 'cwd': '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop', 'env': OrderedDict([('GJS_DEBUG_TOPICS', 'JS ERROR;JS LOG'), ('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'liemtran'), ('LC_TIME', 'vi_VN'), ('FONTCONFIG_PATH', '/etc/fonts'), ('GIO_MODULE_DIR', '/home/liemtran/snap/code/common/.cache/gio-modules'), ('XDG_SESSION_TYPE', 'x11'), ('GIT_ASKPASS', '/snap/code/191/usr/share/code/resources/app/extensions/git/dist/askpass.sh'), ('GTK_EXE_PREFIX_VSCODE_SNAP_ORIG', ''), ('GDK_BACKEND_VSCODE_SNAP_ORIG', ''), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/home/liemtran/liem_ws/install/rosbasic_msgs/lib:/home/liemtran/liem_ws/install/rosbasic_move_msgs/lib:/home/liemtran/liem_ws/install/laser_filters/lib:/home/liemtran/liem_ws/install/drive_msgs/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/home/liemtran'), ('CHROME_DESKTOP', 'code.desktop'), ('LOCPATH_VSCODE_SNAP_ORIG', ''), ('OLDPWD', '/home/liemtran/liem_ws/src'), ('TERM_PROGRAM_VERSION', '1.99.3'), ('DESKTOP_SESSION', 'ubuntu'), ('GTK_PATH', '/snap/code/191/usr/lib/x86_64-linux-gnu/gtk-3.0'), ('XDG_DATA_HOME_VSCODE_SNAP_ORIG', ''), ('GTK_IM_MODULE_FILE', '/home/liemtran/snap/code/common/.cache/immodules/immodules.cache'), ('GIO_LAUNCHED_DESKTOP_FILE', '/var/lib/snapd/desktop/applications/code_code.desktop'), ('ROS_PYTHON_VERSION', '3'), ('GNOME_SHELL_SESSION_MODE', 'ubuntu'), ('GTK_MODULES', 'gail:atk-bridge'), ('GSETTINGS_SCHEMA_DIR_VSCODE_SNAP_ORIG', ''), ('VSCODE_GIT_ASKPASS_MAIN', '/snap/code/191/usr/share/code/resources/app/extensions/git/dist/askpass-main.js'), ('LC_MONETARY', 'vi_VN'), ('VSCODE_GIT_ASKPASS_NODE', '/snap/code/191/usr/share/code/code'), ('MANAGERPID', '1240'), ('PYDEVD_DISABLE_FILE_VALIDATION', '1'), ('SYSTEMD_EXEC_PID', '1712'), ('BUNDLED_DEBUGPY_PATH', '/home/liemtran/.vscode/extensions/ms-python.debugpy-2025.8.0-linux-x64/bundled/libs/debugpy'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('GIO_LAUNCHED_DESKTOP_FILE_PID', '4716'), ('COLCON_PREFIX_PATH', '/home/liemtran/liem_ws/install'), ('ROS_DISTRO', 'humble'), ('GTK_IM_MODULE', 'ibus'), ('LOGNAME', 'liemtran'), ('JOURNAL_STREAM', '8:17866'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_CONFIG_DIRS_VSCODE_SNAP_ORIG', '/etc/xdg/xdg-ubuntu:/etc/xdg'), ('XDG_SESSION_CLASS', 'user'), ('XDG_DATA_DIRS_VSCODE_SNAP_ORIG', '/usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('USERNAME', 'liemtran'), ('TERM', 'xterm-256color'), ('GNOME_DESKTOP_SESSION_ID', 'this-is-deprecated'), ('ROS_LOCALHOST_ONLY', '0'), ('WINDOWPATH', '2'), ('PATH', '/opt/ros/humble/bin:/home/liemtran/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/liemtran/.vscode/extensions/ms-python.debugpy-2025.8.0-linux-x64/bundled/scripts/noConfigScripts:/home/liemtran/.config/Code/User/globalStorage/github.copilot-chat/debugCommand'), ('SESSION_MANAGER', 'local/Lenovo:@/tmp/.ICE-unix/1685,unix/Lenovo:/tmp/.ICE-unix/1685'), ('GTK_EXE_PREFIX', '/snap/code/191/usr'), ('INVOCATION_ID', '5aa9b929770e4475803fdecd00b9d232'), ('XDG_MENU_PREFIX', 'gnome-'), ('LC_ADDRESS', 'vi_VN'), ('BAMF_DESKTOP_FILE_HINT', '/var/lib/snapd/desktop/applications/code_code.desktop'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('GDK_BACKEND', 'x11'), ('DISPLAY', ':0'), ('LOCPATH', '/snap/code/191/usr/lib/locale'), ('VSCODE_DEBUGPY_ADAPTER_ENDPOINTS', '/home/liemtran/.vscode/extensions/ms-python.debugpy-2025.8.0-linux-x64/.noConfigDebugAdapterEndpoints/endpoint-2850af801e7d20a6.txt'), ('LANG', 'en_US.UTF-8'), ('XDG_CURRENT_DESKTOP', 'Unity'), ('LC_TELEPHONE', 'vi_VN'), ('GIO_MODULE_DIR_VSCODE_SNAP_ORIG', ''), ('XDG_DATA_HOME', '/home/liemtran/snap/code/191/.local/share'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'ubuntu'), ('XAUTHORITY', '/run/user/1000/gdm/Xauthority'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('VSCODE_GIT_IPC_HANDLE', '/run/user/1000/vscode-git-45688a49e8.sock'), ('TERM_PROGRAM', 'vscode'), ('SSH_AGENT_LAUNCHER', 'gnome-keyring'), ('SSH_AUTH_SOCK', '/run/user/1000/keyring/ssh'), ('GSETTINGS_SCHEMA_DIR', '/home/liemtran/snap/code/191/.local/share/glib-2.0/schemas'), ('ROS_DOMAIN_ID', '7'), ('AMENT_PREFIX_PATH', '/home/liemtran/liem_ws/install/user_interface:/home/liemtran/liem_ws/install/bumperbot_bringup:/home/liemtran/liem_ws/install/rplidar_ros:/home/liemtran/liem_ws/install/rosbasic_msgs:/home/liemtran/liem_ws/install/rosbasic_move_msgs:/home/liemtran/liem_ws/install/ros_basic:/home/liemtran/liem_ws/install/robot_bringup:/home/liemtran/liem_ws/install/nhatbot_twist_teleop:/home/liemtran/liem_ws/install/laser_filters:/home/liemtran/liem_ws/install/drive_rtu:/home/liemtran/liem_ws/install/drive_msgs:/home/liemtran/liem_ws/install/differential_drive:/home/liemtran/liem_ws/install/bumperbot_description:/home/liemtran/liem_ws/install/bumperbot_controller:/opt/ros/humble'), ('ORIGINAL_XDG_CURRENT_DESKTOP', 'ubuntu:GNOME'), ('SHELL', '/bin/bash'), ('LC_NAME', 'vi_VN'), ('QT_ACCESSIBILITY', '1'), ('NO_AT_BRIDGE', '1'), ('GDMSESSION', 'ubuntu'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('GTK_PATH_VSCODE_SNAP_ORIG', ''), ('FONTCONFIG_FILE', '/etc/fonts/fonts.conf'), ('GTK_IM_MODULE_FILE_VSCODE_SNAP_ORIG', ''), ('LC_MEASUREMENT', 'vi_VN'), ('GPG_AGENT_INFO', '/run/user/1000/gnupg/S.gpg-agent:0:1'), ('GJS_DEBUG_OUTPUT', 'stderr'), ('LC_IDENTIFICATION', 'vi_VN'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', ''), ('QT_IM_MODULE', 'ibus'), ('PWD', '/home/liemtran/liem_ws/src/nhatbot_twist_teleop/build/nhatbot_twist_teleop'), ('LC_ALL', 'en_US.UTF-8'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-ubuntu:/etc/xdg'), ('XDG_DATA_DIRS', '/home/liemtran/snap/code/191/.local/share:/home/liemtran/snap/code/191:/snap/code/191/usr/share:/usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('PYTHONPATH', '/home/liemtran/liem_ws/install/rosbasic_msgs/local/lib/python3.10/dist-packages:/home/liemtran/liem_ws/install/rosbasic_move_msgs/local/lib/python3.10/dist-packages:/home/liemtran/liem_ws/install/drive_msgs/local/lib/python3.10/dist-packages:/home/liemtran/liem_ws/install/bumperbot_controller/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('LC_NUMERIC', 'vi_VN'), ('LC_PAPER', 'vi_VN'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/home/liemtran/liem_ws/install/user_interface:/home/liemtran/liem_ws/install/bumperbot_bringup:/home/liemtran/liem_ws/install/rplidar_ros:/home/liemtran/liem_ws/install/rosbasic_msgs:/home/liemtran/liem_ws/install/rosbasic_move_msgs:/home/liemtran/liem_ws/install/ros_basic:/home/liemtran/liem_ws/install/robot_bringup:/home/liemtran/liem_ws/install/nhatbot_twist_teleop:/home/liemtran/liem_ws/install/laser_filters:/home/liemtran/liem_ws/install/drive_rtu:/home/liemtran/liem_ws/install/drive_msgs:/home/liemtran/liem_ws/install/differential_drive:/home/liemtran/liem_ws/install/bumperbot_description:/home/liemtran/liem_ws/install/bumperbot_controller:/opt/ros/humble')]), 'shell': False}
+[0.045060] (nhatbot_twist_teleop) StdoutLine: {'line': b'\x1b[35m\x1b[1mConsolidate compiler generated dependencies of target twist_relay\x1b[0m\n'}
+[0.045505] (nhatbot_twist_teleop) StdoutLine: {'line': b'\x1b[35m\x1b[1mConsolidate compiler generated dependencies of target joy_to_twist\x1b[0m\n'}
+[0.059991] (nhatbot_twist_teleop) StdoutLine: {'line': b'[ 50%] \x1b[32mBuilding CXX object CMakeFiles/joy_to_twist.dir/src/joy_to_twist.cpp.o\x1b[0m\n'}
+[0.060194] (nhatbot_twist_teleop) StdoutLine: {'line': b'[ 50%] \x1b[32mBuilding CXX object CMakeFiles/twist_relay.dir/src/twist_relay.cpp.o\x1b[0m\n'}
+[0.100038] (-) TimerEvent: {}
+[0.200457] (-) TimerEvent: {}
+[0.300883] (-) TimerEvent: {}
+[0.401323] (-) TimerEvent: {}
+[0.501676] (-) TimerEvent: {}
+[0.602105] (-) TimerEvent: {}
+[0.702536] (-) TimerEvent: {}
+[0.802978] (-) TimerEvent: {}
+[0.903348] (-) TimerEvent: {}
+[1.003784] (-) TimerEvent: {}
+[1.104265] (-) TimerEvent: {}
+[1.204709] (-) TimerEvent: {}
+[1.305172] (-) TimerEvent: {}
+[1.405513] (-) TimerEvent: {}
+[1.409227] (nhatbot_twist_teleop) StderrLine: {'line': b'\x1b[01m\x1b[K/home/liemtran/liem_ws/src/nhatbot_twist_teleop/src/twist_relay.cpp:\x1b[m\x1b[K In constructor \xe2\x80\x98\x1b[01m\x1b[KTwistRelay::TwistRelay()\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[1.409443] (nhatbot_twist_teleop) StderrLine: {'line': b'\x1b[01m\x1b[K/home/liemtran/liem_ws/src/nhatbot_twist_teleop/src/twist_relay.cpp:10:9:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[KTwist_mux\x1b[m\x1b[K\xe2\x80\x99 was not declared in this scope\n'}
+[1.409539] (nhatbot_twist_teleop) StderrLine: {'line': b'   10 |         \x1b[01;31m\x1b[KTwist_mux\x1b[m\x1b[K and Controller\n'}
+[1.409625] (nhatbot_twist_teleop) StderrLine: {'line': b'      |         \x1b[01;31m\x1b[K^~~~~~~~~\x1b[m\x1b[K\n'}
+[1.413319] (nhatbot_twist_teleop) StderrLine: {'line': b'\x1b[01m\x1b[K/home/liemtran/liem_ws/src/nhatbot_twist_teleop/src/twist_relay.cpp:10:23:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[KController\x1b[m\x1b[K\xe2\x80\x99 was not declared in this scope; did you mean \xe2\x80\x98\x1b[01m\x1b[Kcontroller_sub_\x1b[m\x1b[K\xe2\x80\x99?\n'}
+[1.413531] (nhatbot_twist_teleop) StderrLine: {'line': b'   10 |         Twist_mux and \x1b[01;31m\x1b[KController\x1b[m\x1b[K\n'}
+[1.413619] (nhatbot_twist_teleop) StderrLine: {'line': b'      |                       \x1b[01;31m\x1b[K^~~~~~~~~~\x1b[m\x1b[K\n'}
+[1.413694] (nhatbot_twist_teleop) StderrLine: {'line': b'      |                       \x1b[32m\x1b[Kcontroller_sub_\x1b[m\x1b[K\n'}
+[1.421428] (nhatbot_twist_teleop) StderrLine: {'line': b'\x1b[01m\x1b[K/home/liemtran/liem_ws/src/nhatbot_twist_teleop/src/twist_relay.cpp:15:9:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[KJoystick\x1b[m\x1b[K\xe2\x80\x99 was not declared in this scope\n'}
+[1.421639] (nhatbot_twist_teleop) StderrLine: {'line': b'   15 |         \x1b[01;31m\x1b[KJoystick\x1b[m\x1b[K and Twist_mux\n'}
+[1.421734] (nhatbot_twist_teleop) StderrLine: {'line': b'      |         \x1b[01;31m\x1b[K^~~~~~~~\x1b[m\x1b[K\n'}
+[1.505739] (-) TimerEvent: {}
+[1.606138] (-) TimerEvent: {}
+[1.706528] (-) TimerEvent: {}
+[1.806921] (-) TimerEvent: {}
+[1.907252] (-) TimerEvent: {}
+[1.979389] (nhatbot_twist_teleop) StderrLine: {'line': b'gmake[2]: *** [CMakeFiles/twist_relay.dir/build.make:76: CMakeFiles/twist_relay.dir/src/twist_relay.cpp.o] Error 1\n'}
+[1.979639] (nhatbot_twist_teleop) StderrLine: {'line': b'gmake[1]: *** [CMakeFiles/Makefile2:165: CMakeFiles/twist_relay.dir/all] Error 2\n'}
+[1.979715] (nhatbot_twist_teleop) StderrLine: {'line': b'gmake[1]: *** Waiting for unfinished jobs....\n'}
+[2.007417] (-) TimerEvent: {}
+[2.107799] (-) TimerEvent: {}
+[2.208282] (-) TimerEvent: {}
+[2.308650] (-) TimerEvent: {}
+[2.409087] (-) TimerEvent: {}
+[2.509331] (-) TimerEvent: {}
+[2.609684] (-) TimerEvent: {}
+[2.710081] (-) TimerEvent: {}
+[2.810418] (-) TimerEvent: {}
+[2.910785] (-) TimerEvent: {}
+[3.011209] (-) TimerEvent: {}
+[3.111561] (-) TimerEvent: {}
+[3.211905] (-) TimerEvent: {}
+[3.312262] (-) TimerEvent: {}
+[3.412615] (-) TimerEvent: {}
+[3.512986] (-) TimerEvent: {}
+[3.613337] (-) TimerEvent: {}
+[3.713717] (-) TimerEvent: {}
+[3.814072] (-) TimerEvent: {}
+[3.914417] (-) TimerEvent: {}
+[4.014749] (-) TimerEvent: {}
+[4.115110] (-) TimerEvent: {}
+[4.215345] (-) TimerEvent: {}
+[4.315639] (-) TimerEvent: {}
+[4.415986] (-) TimerEvent: {}
+[4.516341] (-) TimerEvent: {}
+[4.616589] (-) TimerEvent: {}
+[4.716915] (-) TimerEvent: {}
+[4.817299] (-) TimerEvent: {}
+[4.917576] (-) TimerEvent: {}
+[4.992027] (nhatbot_twist_teleop) StdoutLine: {'line': b'[ 75%] \x1b[32m\x1b[1mLinking CXX executable joy_to_twist\x1b[0m\n'}
+[5.017768] (-) TimerEvent: {}
+[5.118227] (-) TimerEvent: {}
+[5.218549] (-) TimerEvent: {}
+[5.229973] (nhatbot_twist_teleop) StdoutLine: {'line': b'[ 75%] Built target joy_to_twist\n'}
+[5.230771] (nhatbot_twist_teleop) StderrLine: {'line': b'gmake: *** [Makefile:146: all] Error 2\n'}
+[5.232273] (nhatbot_twist_teleop) CommandEnded: {'returncode': 2}
+[5.239471] (nhatbot_twist_teleop) JobEnded: {'identifier': 'nhatbot_twist_teleop', 'rc': 2}
+[5.249866] (-) EventReactorShutdown: {}

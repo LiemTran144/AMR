@@ -1,0 +1,15 @@
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/ament_index/resource_index/package_run_dependencies/user_interface
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/ament_index/resource_index/parent_prefix_path/user_interface
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/environment/ament_prefix_path.sh
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/environment/ament_prefix_path.dsv
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/environment/path.sh
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/environment/path.dsv
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/local_setup.bash
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/local_setup.sh
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/local_setup.zsh
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/local_setup.dsv
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/package.dsv
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/ament_index/resource_index/packages/user_interface
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/cmake/user_interfaceConfig.cmake
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/cmake/user_interfaceConfig-version.cmake
+/home/liemtran/liem_ws/src/user_interface/install/user_interface/share/user_interface/package.xml
