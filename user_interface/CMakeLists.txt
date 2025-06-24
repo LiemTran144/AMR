@@ -9,7 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 install(
   PROGRAMS
-  ${PROJECT_NAME}/UI_Node.py
+  ${PROJECT_NAME}/ui_Node.py
   ${PROJECT_NAME}/robot_ui.py
   DESTINATION lib/${PROJECT_NAME}
 )

@@ -208,27 +208,6 @@ class ZLAC8015D_API:
         except Exception as e:
             print(f"❌ Lỗi khi reset động cơ: {str(e)}")
 
-
-
-    
-    # def modbus_fail_read_handler(self, ADDR, WORD):
-    #     read_success = False
-    #     reg = [None]*WORD
-    #     while not read_success:
-    #         result = self.client.read_holding_registers(ADDR, WORD, unit=self.ID)
-    #         if result.isError():
-    #             print("Có lỗi xảy ra:", result)
-    #         # else:
-    #         #     print("Giá trị các thanh ghi:", result.registers)
-    #         try:
-    #             for i in range(WORD):
-    #                 reg[i] = result.registers[i]
-    #             read_success = True
-    #         except AttributeError as e:
-    #             print(e)
-    #             pass
-    #     return reg
-
     def modbus_fail_read_handler(self, ADDR, WORD, max_retries=3, delay=0.1):
         """🔍 Đọc dữ liệu Modbus với tối đa `max_retries` lần thử lại"""
         reg = [None] * WORD  # Mảng chứa dữ liệu đọc được

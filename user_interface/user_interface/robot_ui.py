@@ -1,38 +1,21 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFileDialog
 from PyQt5.uic import loadUi
-
+import numpy as np
 import pyqtgraph as pg
-import random
+
 from pyqtgraph.Qt import QtCore
 import csv
-import sys
+
 
 class RobotUI(QMainWindow):
     def __init__(self):
         super().__init__()
         loadUi("/home/liemtran/liem_ws/src/user_interface/ui/test.ui", self)
+        # loadUi("/home/liemtran/liem_ws/src/user_interface/ui/final.ui", self)
         
         self.setWindowTitle("Mobile Robot Control")
         self.setGeometry(100, 100, 1300, 900)  # Set window size and position
-
-
-        self.stopButton.pressed.connect(self.stop)
-        self.forwardButton.pressed.connect(self.forward_button_press)
-        self.leftButton.pressed.connect(self.left_button_press)
-        self.rightButton.pressed.connect(self.right_button_press)
-        self.backwardButton.pressed.connect(self.backward_button_press)
-
-
-        self.forwardButton.released.connect(self.stop)
-        self.leftButton.released.connect(self.stop)
-        self.rightButton.released.connect(self.stop)
-        self.backwardButton.released.connect(self.stop)
-
-
-        self.sendGoalButton.clicked.connect(self.sendGoal_clicked)
-        self.pauseButton.clicked.connect(self.pauseButton_clicked)
         
-
         self.light_color_stop()
 
         self.plot_widget = pg.PlotWidget()
@@ -47,7 +30,6 @@ class RobotUI(QMainWindow):
 
         self.plot_widget.setLabel('left', 'Y')       # trục Y
         self.plot_widget.setLabel('bottom', 'X')     # trục X        
-        # self.plot_widget.setTitle("Robot Waypoint Tracking")
         self.plot_widget.setAspectLocked(True) # Giữ tỉ lệ khung hình cố định
 
         self.setpoint_x= []
@@ -57,32 +39,21 @@ class RobotUI(QMainWindow):
         self.plot_widget.addLegend(offset=(0, 10))
         # Tạo plot
         self.curve_setpoint = self.plot_widget.plot(self.setpoint_x, self.setpoint_y,
-                                                    pen=pg.mkPen('b', width=2), name="Setpoint")
+                                                    pen=pg.mkPen(color=(0,0,255), width=4), name="Waypoints (Setpoint)")
         self.curve_current = self.plot_widget.plot(self.current_x, self.current_y,
-                                                pen=pg.mkPen('g', width=2), name="Current")
+                                                pen=pg.mkPen(color=(0,255,0), width=4), name="Current_Position")
 
-        # Internal time counter
-        self.t = 0
-
-        # self.load_csv_data("waypoints.csv")
-        self.loadCSVButton.clicked.connect(self.choose_csv_file)
         self.clearGraphButton.clicked.connect(self.clearGraph)
 
     def clearGraph(self):
+        self.setpoint_x.clear()
+        self.setpoint_y.clear()
+        self.current_x.clear()
+        self.current_y.clear()
         self.curve_setpoint.setData([], [])
         self.curve_current.setData([], [])
 
-    def choose_csv_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)")
-        if file_path:
-            self.load_csv_data(file_path)
-
-            # self.pathLabel.setWordWrapMode(QTextOption.WordWrap)
-            self.pathLabel.setText(file_path)  # Hiển thị đường dẫn file đã chọn
-            self.pathLabel.adjustSize()  # Tự động điều chỉnh kích thước nhãn
-
-
-    def load_csv_data(self, file_path):
+    def plot_setpoint(self, file_path):
         self.setpoint_x = []
         self.setpoint_y = []
 
@@ -103,15 +74,36 @@ class RobotUI(QMainWindow):
         self.num_points = len(self.setpoint_x)
         self.curve_setpoint.setData(self.setpoint_x, self.setpoint_y)
 
+
     def update_current_position(self, x, y):
-        
-        self.xCurrentPos.display(x)
-        self.yCurrentPos.display(y)
-        self.current_x.append(x)
-        self.current_y.append(y)
+
+        if not self.current_x:
+            self.current_x.append(x)
+            self.current_y.append(y)
+        else:
+            x_prev = self.current_x[-1]
+            y_prev = self.current_y[-1]
+
+            dx = abs(x - x_prev)
+            dy = abs(y - y_prev)
+            threshold = 1.0  
+
+            if dx > threshold or dy > threshold:
+
+                self.current_x.append(np.nan)
+                self.current_y.append(np.nan)
+
+            self.current_x.append(x)
+            self.current_y.append(y)
+
         self.curve_current.setData(self.current_x, self.current_y)
 
+        self.xCurrentPos.display(x)
+        self.yCurrentPos.display(y)
 
+    def update_Velocity(self, linear, angular):
+        self.linearVel.display(linear)
+        self.angularVel.display(angular)
 
     def light_color_stop(self):
         self.stopIndicator.setStyleSheet("background-color: gold;"
@@ -135,40 +127,14 @@ class RobotUI(QMainWindow):
         self.errorIndicator.setStyleSheet("background-color: lightgray;"
                                          "border-radius: 35px;" 
                                          "border: 2px solid black;")
-
-    def stop(self):
-        self.light_color_stop()
-    
-        self.update_plot()
-    def forward_button_press(self):
-        self.light_color_run()
-
-    def left_button_press(self):
-        self.light_color_run()
-
-    def right_button_press(self):
-        self.light_color_run()
-
-    def backward_button_press(self):
-        self.light_color_run()
-
-    def sendGoal_clicked(self):
-        self.light_color_run()
-
-    def pauseButton_clicked(self):
-
-        if self.pauseButton.text() == "Pause":
-            self.pauseButton.setText("Resume")
-
-            self.light_color_stop()
-        else:
-            self.pauseButton.setText("Pause")
-
-            self.light_color_run()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = RobotUI()
-    window.show()
-    sys.exit(app.exec_())
+        
+    def light_color_error(self):
+        self.errorIndicator.setStyleSheet("background-color: red;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+        self.runIndicator.setStyleSheet("background-color: lightgray;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+        self.stopIndicator.setStyleSheet("background-color: lightgray;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")

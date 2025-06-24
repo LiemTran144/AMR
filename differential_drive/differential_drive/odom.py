@@ -25,6 +25,7 @@ class odom(Node):
         self.vel_sub_ = self.create_subscription(JointState, '/JointState',self.jointCallback, 10)
         
         self.odom_pub_ = self.create_publisher(Odometry, "liem_controller/odom", 10)
+        self.timer = self.create_timer(0.01, self.publish_tf)
 
         # Fill the Odometry message with invariant parameters
         self.odom_msg_ = Odometry()
@@ -49,7 +50,6 @@ class odom(Node):
         self.theta_ = 0.0
         self.linear_filtered = 0.0
         self.angular_filtered = 0.0
-
 
     def jointCallback(self, msg):
         print("jointCallback: ", msg.position)
@@ -133,7 +133,21 @@ class odom(Node):
         self.odom_pub_.publish(odom_msg)
         print("Odometry published")
 
+        # # #TF
+        # self.transform_stamped_.transform.translation.x = self.x_
+        # self.transform_stamped_.transform.translation.y = self.y_
+
+        # self.transform_stamped_.transform.rotation.x = q[0]
+        # self.transform_stamped_.transform.rotation.y = q[1]
+        # self.transform_stamped_.transform.rotation.z = q[2]
+        # self.transform_stamped_.transform.rotation.w = q[3]
+
+        # self.transform_stamped_.header.stamp = self.get_clock().now().to_msg()
+        # self.br_.sendTransform(self.transform_stamped_)
+
+    def publish_tf(self):
         # #TF
+        q = quaternion_from_euler(0, 0, self.theta_)
         self.transform_stamped_.transform.translation.x = self.x_
         self.transform_stamped_.transform.translation.y = self.y_
 

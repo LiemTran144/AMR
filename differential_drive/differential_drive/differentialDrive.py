@@ -6,6 +6,8 @@ from std_msgs.msg import Float64MultiArray
 from zlac8015d import ZLAC8015D_API
 from sensor_msgs.msg import JointState
 import numpy as np
+from std_msgs.msg import Bool
+# from drive_msgs import zlacStatus
 
 class differentialDriveNode(Node):
 
@@ -33,6 +35,26 @@ class differentialDriveNode(Node):
         self.wheel_JointState_pub_ = self.create_publisher(JointState, 'JointState',10)
         self.timer_JointState_ = self.create_timer(0.1, self.pub_JointState_Callback)
 
+        # self.fault_pub_ = self.create_publisher(Bool, '/liem_controller/fault', 10)
+        # self.timer_Fault_ = self.create_timer(0.1, self.pub_Fault_Callback)
+
+        # self.driverStatus_pub_ = self.create_publisher(zlacStatus, '/liem_controller/driver_status', 10)
+        # self.timer_driverStatus_ = self.create_timer(0.1, self.pub_driverStatus_Callback)
+
+    def pub_Fault_Callback(self):
+        fault_msg = Bool()
+        left_fault, right_fault = self.driver.get_fault_code()
+        left_fault_flag, left_fault_code = left_fault
+        right_fault_flag, right_fault_code = right_fault
+        if left_fault_flag or right_fault_flag:
+            self.get_logger().error(f"Left Wheel Fault: {left_fault_code}, Right Wheel Fault: {right_fault_code}")
+            fault_msg.data = True
+        else:
+            fault_msg.data = False
+        self.fault_pub_.publish(fault_msg)
+
+
+
     def pub_JointState_Callback(self):
 
         msg_wheel_JointState_ = JointState()   
@@ -58,6 +80,29 @@ class differentialDriveNode(Node):
         # Gửi lệnh điều khiển RPM tới driver
         self.driver.set_rpm(-left_rpm,right_rpm)
 
+    def exit_driver(self):
+
+        """Stop the motor safely when ROS shuts down"""
+        if self.driver:
+            try:
+                print("🛑 Stopping motor immediately!")
+                self.driver.set_rpm(0, 0)  
+                self.driver.disable_motor()
+                self.driver.close_connect()
+            except Exception as e:
+               print(f"❌ Failed to stop motor: {str(e)}")
+
+    # def pub_driverStatus_Callback(self):
+    #     # zlac_status = zlacStatus()
+    #     # motor_temperature = self.bldcMotor.get_motor_temperature()
+    #     zlac_status.battery_voltage = float(self.driver.get_battery_voltage())
+    #     zlac_status.brake_state = str(self.driver.get_brake_state())
+    #     zlac_status.control_mode = int(self.driver.get_mode())
+    #     zlac_status.driver_temp = float(self.driver.get_driver_temperature())
+    #     # zlac_status.vehicle_state = str(self.motor_states)
+
+    #     self.driverStatus_pub_.publish(zlac_status)
+
 def main(args=None):
     try:
         rclpy.init(args=args)
@@ -69,6 +114,12 @@ def main(args=None):
         pass
     except Exception as e:
         print(e)
+    finally:
+        node.exit_driver()
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+        print("Driver Node has been shut down.")
 
 if __name__ == '__main__':
     main()

@@ -23,25 +23,18 @@ class PathPublisher(Node):
         self.csv_full_path = os.path.join(csv_path, csv_file)
 
         # Tạo publisher cho topic /path
-        self.publisher_ = self.create_publisher(Path, '/liem_path', 10)
-
-
+        self.publisher_ = self.create_publisher(Path, '/liem_path123456', 10)
         # path: Header: frame_id: 'map'
         #               stamped: 
         #       poses: position(point)
         #              orientation(quaternion)  
 
-
-
         self.timer = self.create_timer(1.0, self.publish_path)
 
-        # with open(csv_file, 'r') as file:
-        #     reader = csv.reader(file)
-        #     next(reader) 
+
         self.path_published = False
     def publish_path(self):
-        if self.path_published:
-            return
+
 
         path_msg = Path()
         path_msg.header.stamp = self.get_clock().now().to_msg()
@@ -57,11 +50,9 @@ class PathPublisher(Node):
                     pose = PoseStamped()
                     pose.header.stamp = self.get_clock().now().to_msg()
                     pose.header.frame_id = 'map'
-
                     pose.pose.position.x = float(row['x'])
                     pose.pose.position.y = float(row['y'])
                     pose.pose.position.z = 0.0
-
                     pose.pose.orientation.w = 1.0
 
                     poses.append(pose)

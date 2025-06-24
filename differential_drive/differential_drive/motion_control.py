@@ -19,26 +19,28 @@ class PDMotionPlanner(Node):
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
         # Parameters
-        self.declare_parameter("kp", 2.0)
-        self.declare_parameter("kd", 0.1)
+        self.declare_parameter("kp", 1.5)
+        self.declare_parameter("kd", 0.0)
         self.declare_parameter("step_size", 0.2)
         self.declare_parameter("max_linear_velocity", 0.1)
-        self.declare_parameter("max_angular_velocity", 0.1)
+        self.declare_parameter("max_angular_velocity", 0.2)
+        self.declare_parameter("deathband", 0.1)
 
         self.kp = self.get_parameter("kp").value
         self.kd = self.get_parameter("kd").value
         self.step_size = self.get_parameter("step_size").value
         self.max_linear_velocity = self.get_parameter("max_linear_velocity").value
         self.max_angular_velocity = self.get_parameter("max_angular_velocity").value
+        self.deathband = self.get_parameter("deathband").value
 
         # Subscribers and publishers
-        self.path_sub = self.create_subscription(Path, '/liem_path', self.path_callback, 10)
-        self.cmd_pub = self.create_publisher(Twist, "/liem_controller/cmd_vel", 10) 
+        self.path_sub = self.create_subscription(Path, '/liem/ui_path', self.path_callback, 10)
+        self.cmd_pub = self.create_publisher(Twist, "/liem_controller/cmd_vel", 10)    #"/liem_controller/cmd_vel" "/UI/cmd_vel"
 
         self.next_pose_pub = self.create_publisher(PoseStamped, "/pd/next_pose", 10)
 
         # Control loop
-        self.timer = self.create_timer(0.1, self.control_loop)
+        self.timer = self.create_timer(0.01, self.control_loop)
         self.global_plan = None
 
         self.prev_angular_error = 0.0
@@ -47,17 +49,22 @@ class PDMotionPlanner(Node):
 
     def path_callback(self, path: Path):
         self.global_plan = path #frame_id ='map'
-                                # self.global_plan.header.frame_id = 'map'
-                                # global_plan.
 
     def control_loop(self):
         if not self.global_plan or not self.global_plan.poses:
             return
-
+        cmd_vel = Twist()
         # Get the robot's current pose in the odom frame
         try:
+            # robot_pose_transform = self.tf_buffer.lookup_transform(
+            #     "odom", "base_link", rclpy.time.Time())
+            
             robot_pose_transform = self.tf_buffer.lookup_transform(
-                "odom", "base_link", rclpy.time.Time())
+                target_frame ="odom", 
+                source_frame ="base_link", 
+                time= rclpy.time.Time(),
+                timeout= rclpy.duration.Duration(seconds=1.0))
+            
             # trans = self.tf_buffer.lookup_transform(
             #     target_frame='map',
             #     source_frame='base_link',
@@ -74,6 +81,7 @@ class PDMotionPlanner(Node):
             self.get_logger().error("Unable to transform Plan in robot's frame")
             return
 
+
         robot_pose = PoseStamped()
         robot_pose.header.frame_id = robot_pose_transform.header.frame_id
         robot_pose.pose.position.x = robot_pose_transform.transform.translation.x
@@ -85,9 +93,13 @@ class PDMotionPlanner(Node):
         dy = next_pose.pose.position.y - robot_pose.pose.position.y
         distance = math.sqrt(dx ** 2 + dy ** 2)
 
-        if distance <= 0.1:
+        if distance <= self.deathband:
             self.get_logger().info("Goal Reached!")
             self.global_plan.poses.clear()
+
+            cmd_vel.linear.x = 0.0
+            cmd_vel.angular.z = 0.0
+            self.cmd_pub.publish(cmd_vel)
             return
 
         self.next_pose_pub.publish(next_pose)
@@ -111,23 +123,33 @@ class PDMotionPlanner(Node):
         ])
         next_pose_tf[0][3] = next_pose.pose.position.x
         next_pose_tf[1][3] = next_pose.pose.position.y
+        # print(f"Next pose: {next_pose_tf[0, 3]}, {next_pose_tf[1, 3]}") 
 
         # Compute relative transform: next_pose_robot_tf = robot_tf.inverse() * next_pose_tf
         # inverse_matrix(robot_tf) trasforms robot_tf from base_link to odom frame
         # next_pose_tf is the target pose in odom frame
 
         next_pose_robot_tf = concatenate_matrices(inverse_matrix(robot_tf), next_pose_tf)
+ 
+
+        # print(f"Robot pose: {robot_pose.pose.position.x}, {robot_pose.pose.position.y}")
+        # # print(f"Next pose: {next_pose.pose.position.x}, {next_pose.pose.position.y}")
+        # print(f"Next pose in robot frame: {next_pose_robot_tf[0, 3]}, {next_pose_robot_tf[1, 3]}") #dang trong map
+
 
         # Extract relative position and orientation
         angular_error = next_pose_robot_tf[1, 3]
         linear_error = next_pose_robot_tf[0, 3] 
+        print(f"linear error: {linear_error}")
+        print(f"anglular: {angular_error}")
 
+    
         dt = (self.get_clock().now() - self.last_cycle_time).nanoseconds * 1e-9
 
         angular_error_derivative = (angular_error - self.prev_angular_error) / dt
         linear_error_derivative = (linear_error - self.prev_linear_error) / dt
 
-        cmd_vel = Twist()
+
         cmd_vel.angular.z = max(
             -self.max_angular_velocity,
             min(self.kp * angular_error + self.kd * angular_error_derivative, self.max_angular_velocity)
@@ -152,6 +174,7 @@ class PDMotionPlanner(Node):
                 next_pose = pose
             else:
                 break
+        # print(f"Next pose: {next_pose.pose.position.x}, {next_pose.pose.position.y}") #trong frame map
         return next_pose
 
     def transform_plan(self, frame):
@@ -159,8 +182,15 @@ class PDMotionPlanner(Node):
             return True
 
         try:
+            # transform = self.tf_buffer.lookup_transform(
+            #     frame, self.global_plan.header.frame_id, rclpy.time.Time()) 
+
             transform = self.tf_buffer.lookup_transform(
-                frame, self.global_plan.header.frame_id, rclpy.time.Time())          
+                target_frame =frame, 
+                source_frame =self.global_plan.header.frame_id, 
+                time= rclpy.time.Time(),
+                timeout= rclpy.duration.Duration(seconds=1.0))   
+                  
             # transform = self.tf_buffer.lookup_transform(
             #     target_frame='odom',
             #     source_frame='map',time=rclpy.time.Time()) 
@@ -189,7 +219,9 @@ class PDMotionPlanner(Node):
             pose_matrix[0][3] = pose.pose.position.x
             pose_matrix[1][3] = pose.pose.position.y
 
-            transformed_pose = concatenate_matrices(pose_matrix, transform_matrix)
+            # transformed_pose = concatenate_matrices(pose_matrix, transform_matrix)
+            transformed_pose = concatenate_matrices(transform_matrix, pose_matrix)
+
             [pose.pose.orientation.x,pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w] = quaternion_from_matrix(transformed_pose)
             [pose.pose.position.x, pose.pose.position.y, pose.pose.position.z] = translation_from_matrix(transformed_pose)
 

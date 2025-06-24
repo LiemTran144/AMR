@@ -3,16 +3,14 @@ twist_mux:
     use_stamped: false
     topics:
       joystick:
-        topic: /input_joy/cmd_vel
+        topic: "/input_joy/cmd_vel"
         timeout: 0.2
         priority: 99
-        
       interface:
-        topic: /UI/cmd_vel
+        topic: "/UI/cmd_vel"
         timeout: 0.5
         priority: 90
-
       navigation:
-        topic: /nav/cmd_vel
+        topic: "/nav/cmd_vel"
         timeout: 0.5
         priority: 10

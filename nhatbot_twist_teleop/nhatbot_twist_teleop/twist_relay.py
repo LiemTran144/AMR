@@ -7,19 +7,20 @@ from geometry_msgs.msg import Twist, TwistStamped
 class TwistRelay(Node):
     def __init__(self):
         super().__init__("twist_relay")
-        self.controller_sub = self.create_subscription(Twist, "/nhatbot_controller/cmd_vel_unstamped", self.controller_twist_callback, 10)
+        self.controller_sub = self.create_subscription(Twist, "/nhatbot_controller/cmd_vel", self.controller_twist_callback, 10)
         self.controoler_pub = self.create_publisher(TwistStamped, "/nhatbot_controller/cmd", 10)
         
         self.joy_sub = self.create_subscription(TwistStamped, "/teleop_stamped", self.joy_twist_callback, 10)
-        self.joy_pub = self.create_publisher(Twist, "teleop", 10)
+        self.joy_pub = self.create_publisher(Twist,"/input_joy/cmd_vel" , 10)  #"/liem_controller/cmd_vel" 
 
     def controller_twist_callback(self, msg):
         twist_stamped = TwistStamped()
         twist_stamped.header.stamp = self.get_clock().now().to_msg()
+        twist_stamped.header.frame_id = "base_link"
         twist_stamped.twist = msg 
         self.controoler_pub.publish(twist_stamped)
     
-    def joy_twist_callback(self, msg):
+    def joy_twist_callback(self, msg: TwistStamped):
         twist = Twist()
         twist = msg.twist
         self.joy_pub.publish(twist)

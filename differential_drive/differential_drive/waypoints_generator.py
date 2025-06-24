@@ -12,7 +12,7 @@ class ClickedWaypointNode(Node):
         super().__init__('clicked_waypoint_node')
         # Declare parameters and retrieve their values
         self.declare_parameter('csv_path', '/home/liemtran/liem_ws/src/user_interface/user_interface')
-        self.declare_parameter('csv_file', 'waypoints295.csv')
+        self.declare_parameter('csv_file', 'baocao.csv')
         self.declare_parameter('interpolation_precision', 10)
         self.declare_parameter('clicked_point_topic', '/clicked_point')
 

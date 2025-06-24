@@ -89,6 +89,11 @@ def generate_launch_description():
         executable="motion_control.py",
     )
 
+    ui_Node = Node(
+        package="user_interface",
+        executable="ui_Node.py",
+    )
+
     lidar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
                 node_path,'launch/lidar_a1.launch.py')))
@@ -115,11 +120,15 @@ def generate_launch_description():
         arguments=['-d', os.path.join(get_package_share_directory(
             'robot_bringup'), 'rviz', 'display_rviz.rviz')])
 
-
-    
     provide_map = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
                 node_path,'launch/provide_map.launch.py')))
+    
+    safety_stop = Node(
+        package="safety",
+        executable="safety_stop.py",
+    )
+    
 
     return LaunchDescription([
         rviz_path,
@@ -134,5 +143,7 @@ def generate_launch_description():
         twist_relay_node,
         joy_to_twist,
         provide_map,
-        path_rviz,
+        # path_rviz,
+        # ui_Node,
+        # safety_stop,
     ])

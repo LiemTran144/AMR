@@ -18,6 +18,7 @@ install(
   ${PROJECT_NAME}/waypoints_generator.py
   ${PROJECT_NAME}/path_rviz.py
   ${PROJECT_NAME}/motion_control.py
+  ${PROJECT_NAME}/pure_pursuit.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
