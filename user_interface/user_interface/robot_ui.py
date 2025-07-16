@@ -8,8 +8,29 @@ import csv
 
 import mysql.connector
 from mysql.connector import Error
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QTextDocument
+from PyQt5.QtPrintSupport import QPrinter
+from PyQt5.QtCore import QDateTime
 from datetime import datetime
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from PyQt5.QtWidgets import QFileDialog
+
+import tempfile
+import os
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout
+
+from PyPDF2 import PdfReader
+from PIL import Image
+from pyqtgraph.exporters import ImageExporter
+
+from reportlab.pdfbase.pdfmetrics import stringWidth
+
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+
 
 
 def mydb(self):
@@ -58,7 +79,7 @@ class RobotUI(QMainWindow):
         self.light_color_stop()
 
         self.plot_widget = pg.PlotWidget()
-        self.plot_widget.setBackground('w')  # 'w' viết tắt cho white
+        self.plot_widget.setBackground('w')  
         plot_layout = QVBoxLayout()              # Tạo layout
         plot_layout.addWidget(self.plot_widget)            # Thêm plot vào layout
         self.plotGroupBox.setLayout(plot_layout)           # Gán layout vào groupbox
@@ -75,6 +96,8 @@ class RobotUI(QMainWindow):
         self.setpoint_y= []
         self.current_x = []
         self.current_y = []
+        self.error_x = []
+        self.error_y = []
         self.plot_widget.addLegend(offset=(0, 10))
         # Tạo plot
         self.curve_setpoint = self.plot_widget.plot(self.setpoint_x, self.setpoint_y,
@@ -82,8 +105,7 @@ class RobotUI(QMainWindow):
         self.curve_current = self.plot_widget.plot(self.current_x, self.current_y,
                                                 pen=pg.mkPen(color=(0,255,0), width=4), name="Current_Position")
         
-        self.error_x = []
-        self.error_y = []
+
         self.curve_error = self.plot_widget.plot(self.error_x,self.error_y ,
                                                 pen=pg.mkPen(color=(255,0,0), width=4), name="Error")
         #database
@@ -97,6 +119,69 @@ class RobotUI(QMainWindow):
         self.linearFilterCheckBox.stateChanged.connect(self.toggle_filters)
         self.angularFilterCheckBox.stateChanged.connect(self.toggle_filters)
         self.filterButton.clicked.connect(self.filter_data)
+        self.exportButton.clicked.connect(self.export_to_pdf)
+
+
+
+    def export_to_pdf(self):
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save PDF", "", "PDF Files (*.pdf)")
+        if not file_path:
+            return
+
+        # Tạo PDF (tạm thời ghi vào file buffer)
+        doc = SimpleDocTemplate(file_path, pagesize=A4)
+        elements = []
+        styles = getSampleStyleSheet()
+
+        # Tiêu đề và thông tin đầu
+        title = Paragraph(" Project D - Robot Log Report", styles['Title'])
+
+        reporter = Paragraph("Reporter: Tran Trung Liem ID: 2131100018", styles['Normal'])
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        time = Paragraph(f"Export Time: {now}", styles['Normal'])
+        table_name = Paragraph(f"Table Name: {self.tableNameTextEdit.toPlainText()}", styles['Normal'])
+
+        elements.extend([title,reporter, time, table_name, Spacer(1, 12)])
+
+        # Lấy dữ liệu từ QTableView
+        model = self.dataTableView.model()
+        if model is None:
+            self.dataLabel.setText("❌ No data to export")
+            self.dataLabel.adjustSize()
+            return
+
+        headers = [model.headerData(col, QtCore.Qt.Horizontal) for col in range(model.columnCount())]
+        data = [headers]
+
+        for row in range(model.rowCount()):
+            row_data = []
+            for col in range(model.columnCount()):
+                index = model.index(row, col)
+                value = str(model.data(index))
+                try:
+                    value = f"{float(value):.4f}"
+                except:
+                    pass
+                row_data.append(value)
+            data.append(row_data)
+
+        # Tạo bảng có đường kẻ
+        table = Table(data, repeatRows=1)
+        table.setStyle(TableStyle([
+            ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+            ('BACKGROUND', (0,0), (-1,0), colors.lightblue),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('FONTSIZE', (0,0), (-1,-1), 9),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ]))
+
+        elements.append(table)
+        doc.build(elements)
+
+        self.dataLabel.setText(f"✅ Exported to PDF: {file_path}")
+        self.dataLabel.adjustSize()
 
     def toggle_filters(self):
         self.dateEdit.setEnabled(self.dateFilterCheckBox.isChecked())
@@ -158,6 +243,12 @@ class RobotUI(QMainWindow):
     def insert_data(self, x, y, error, linear_vel, angular_vel):
         table_name = self.tableNameTextEdit.toPlainText()
 
+        x = round(x, 4)
+        y = round(y, 4)
+        error = round(error, 4)
+        linear_vel = round(linear_vel, 4)
+        angular_vel = round(angular_vel, 4)
+
         # Kiểm tra xem bảng có tồn tại không
         self.cursor.execute(f"SHOW TABLES LIKE '{table_name}'")
         result = self.cursor.fetchone()
@@ -203,8 +294,11 @@ class RobotUI(QMainWindow):
         self.setpoint_y.clear()
         self.current_x.clear()
         self.current_y.clear()
+        self.error_x.clear()
+        self.error_y.clear()
         self.curve_setpoint.setData([], [])
         self.curve_current.setData([], [])
+        self.curve_error.setData([], [])
         self.pathLabel.clear()
 
     def plot_setpoint(self, file_path):

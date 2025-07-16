@@ -2630,9 +2630,9 @@ border: 2px solid black;
        <widget class="QTableView" name="dataTableView">
         <property name="geometry">
          <rect>
-          <x>430</x>
+          <x>570</x>
           <y>10</y>
-          <width>771</width>
+          <width>601</width>
           <height>381</height>
          </rect>
         </property>
@@ -2914,7 +2914,7 @@ border: 2px solid black;
        <widget class="QPushButton" name="filterButton">
         <property name="geometry">
          <rect>
-          <x>-20</x>
+          <x>0</x>
           <y>350</y>
           <width>89</width>
           <height>25</height>
@@ -2935,6 +2935,19 @@ border: 2px solid black;
         </property>
         <property name="text">
          <string>TextLabel</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="exportButton">
+        <property name="geometry">
+         <rect>
+          <x>120</x>
+          <y>350</y>
+          <width>89</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Export</string>
         </property>
        </widget>
       </widget>

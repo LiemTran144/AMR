@@ -34,8 +34,10 @@ amcl:
     min_particles: 2000
     recovery_alpha_fast: 0.0
     recovery_alpha_slow: 0.0
-    update_min_a: 0.2
-    update_min_d: 0.25
+    # update_min_a: 0.2
+    # update_min_d: 0.25
+    update_min_a: 0.05
+    update_min_d: 0.05
 
 # config odometry motion model
     motion_model_type: "nav2_amcl::DifferentialMotionModel"

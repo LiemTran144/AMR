@@ -19,7 +19,7 @@ class FakeAMCLPublisher(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         # Load waypoints from CSV
-        path = '/home/liemtran/liem_ws/src/user_interface/user_interface/waypoints116.csv'
+        path = '/home/liemtran/liem_ws/src/user_interface/data/waypoints116.csv'
         self.df = pd.read_csv(path)
 
         # Tạo thêm điểm nội suy để có nhiều điểm hơn

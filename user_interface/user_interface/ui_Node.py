@@ -286,7 +286,8 @@ class RobotUINode(Node, RobotUI):
         # Cập nhật vị trí hiện tại nếu có thay đổi
         if current_x != self.last_x or current_y != self.last_y:
             self.update_current_position(current_x, current_y)
-            self.insert_data(current_x, current_y, min_error, random.uniform(0.5, 1.5), random.uniform(0.5, 1.5))
+            # self.insert_data(current_x, current_y, min_error, random.uniform(0.5, 1.5), random.uniform(0.5, 1.5))
+            self.insert_data(current_x, current_y, min_error, self.linear_vel, self.angular_vel)
 
             self.rmse += min_error**2
             rmse_value = sqrt(self.rmse / self.index)
@@ -300,22 +301,6 @@ class RobotUINode(Node, RobotUI):
         if msg.data:
             self.light_color_error()
 
-
-
-# def main(args=None):
-#     rclpy.init(args=args)
-
-#     app = QApplication([])
-
-#     node = RobotUINode()
-#     node.show()
-
-#     # 💡 Tạo một thread để chạy rclpy.spin() song song với Qt GUI
-#     ros_thread = Thread(target=rclpy.spin, args=(node,), daemon=True)
-#     ros_thread.start()
-
-#     # ✅ Đây là vòng lặp GUI (Qt sẽ chạy ở thread chính)
-#     sys.exit(app.exec_())
 
 
 def main(args=None):

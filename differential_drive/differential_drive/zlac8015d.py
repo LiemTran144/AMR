@@ -10,7 +10,7 @@ import pymodbus
 class ZLAC8015D_API:
     def __init__(self, port, self_node):
         self._port = port
-        self.client = ModbusClient(method='rtu', port=self._port, baudrate=115200, # "COM3"
+        self.client = ModbusClient(method='rtu', port=self._port, baudrate=115200, 
                                    stopbits=1,parity="N",bytesize=8,timeout=1)
         self.self_node = self_node
         
@@ -434,7 +434,7 @@ class ZLAC8015D_API:
             print(f"❌ Lỗi kết nối Modbus khi gửi set_rpm: {str(e)}")
         except Exception as e:
             print(f"❌ Lỗi không xác định khi gửi set_rpm: {str(e)}")
-
+    
  
     def int16Dec_to_int16Hex(self, int16):
         """✅ Chuyển đổi số nguyên 16-bit từ dạng thập phân sang hex"""
