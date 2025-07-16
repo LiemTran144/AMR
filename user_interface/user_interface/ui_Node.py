@@ -16,6 +16,8 @@ from threading import Thread
 from geometry_msgs.msg import PoseStamped
 from tf_transformations import quaternion_matrix, quaternion_from_matrix, translation_from_matrix, concatenate_matrices
 
+import random
+from math import sqrt
 # from rclpy.callback_groups import ReentrantCallbackGroup
 
 
@@ -64,7 +66,9 @@ class RobotUINode(Node, RobotUI):
         self.last_x = None
         self.last_y = None
         self.is_paused = False
-
+        #database
+        self.index = 0
+        self.rmse = 0.0
     def toggle_pause_path(self):
         if self.is_paused:
             # Nếu đang tạm dừng, tiếp tục gửi đường đi
@@ -171,7 +175,8 @@ class RobotUINode(Node, RobotUI):
             self.path_msg = None
 
     def _start_sending_path_loop(self):
-
+        self.index = 0
+        self.rmse = 0.0
         if self.path_msg and self.path_msg.poses:
             if not self.path_timer.isActive():
                 self.path_timer.start()
@@ -193,60 +198,108 @@ class RobotUINode(Node, RobotUI):
 
     def odom_callback(self, msg: Odometry):
 
-        linear_vel = msg.twist.twist.linear.x
-        angular_vel = msg.twist.twist.angular.z
-        self.update_Velocity(linear_vel, angular_vel)
+        self.linear_vel = msg.twist.twist.linear.x
+        self.angular_vel = msg.twist.twist.angular.z
+        self.update_Velocity(self.linear_vel, self.angular_vel)
         
-        if abs(linear_vel) <= 0.01 and abs(angular_vel) <= 0.01:
+        if abs(self.linear_vel) <= 0.01 and abs(self.angular_vel) <= 0.01:
             self.light_color_stop()
         else:
             self.light_color_run()
 
-        # current_x = msg.pose.pose.position.x
-        # current_y = msg.pose.pose.position.y
+    # def amcl_callback(self, msg: PoseWithCovarianceStamped):
+    #     current_x = msg.pose.pose.position.x
+    #     current_y = msg.pose.pose.position.y
 
-        # if current_x != self.last_x or current_y != self.last_y:
-        #     # self.get_logger().info(f"[odom_callback] Updated Position: x={current_x}, y={current_y}")
-        #     self.update_current_position(current_x, current_y)
+    #     if current_x != self.last_x or current_y != self.last_y:
+    #         # self.get_logger().info(f"[amcl_callback] Updated Position: x={current_x}, y={current_y}")
+    #         self.update_current_position(current_x, current_y)
 
-        # self.last_x = current_x
-        # self.last_y = current_y
+    #     self.last_x = current_x
+    #     self.last_y = current_y
 
-    #     # self.get_logger().info(f"[odom_callback] Position: x={current_x}, y={current_y}, "
-    #     #                        f"Linear Vel: {linear_vel}, Angular Vel: {angular_vel}")
-        
+
+    # def amcl_callback(self, msg: PoseWithCovarianceStamped):
+    #     current_x = msg.pose.pose.position.x
+    #     current_y = msg.pose.pose.position.y
+    #     self.index += 1
+    #     if self.path_msg and self.path_msg.poses:
+    #         # Tìm waypoint gần nhất
+    #         min_error = float('inf')
+    #         closest_waypoint = None
+
+    #         for pose in self.path_msg.poses:
+    #             waypoint_x = pose.pose.position.x
+    #             waypoint_y = pose.pose.position.y
+
+    #             # Tính khoảng cách Euclidean
+    #             error = sqrt((current_x - waypoint_x)**2 + (current_y - waypoint_y)**2)
+
+    #             if error < min_error:
+    #                 min_error = error
+    #                 closest_waypoint = pose
+
+
+    #     # Cập nhật vị trí hiện tại nếu có thay đổi
+    #     if current_x != self.last_x or current_y != self.last_y:
+    #         self.update_current_position(current_x, current_y)
+    #         self.insert_data(current_x, current_y, min_error, 1.0, 1.0)
+
+
+    #         self.rmse += min_error**2
+    #         rmse_value = sqrt(self.rmse / self.index)
+    #         print(f"RMSE after {self.index} poses: {rmse_value:.4f}")
+    #         self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
+    #         self.rmseLabel.adjustSize()
+
+    #     self.last_x = current_x
+    #     self.last_y = current_y
+
     def amcl_callback(self, msg: PoseWithCovarianceStamped):
         current_x = msg.pose.pose.position.x
         current_y = msg.pose.pose.position.y
+        self.index += 1
 
+        if self.path_msg and self.path_msg.poses:
+            # Tìm waypoint gần nhất
+            min_error = float('inf')
+            closest_waypoint = None
+
+            for pose in self.path_msg.poses:
+                waypoint_x = pose.pose.position.x
+                waypoint_y = pose.pose.position.y
+
+                # Tính khoảng cách Euclidean
+                error = sqrt((current_x - waypoint_x)**2 + (current_y - waypoint_y)**2)
+
+                if error < min_error:
+                    min_error = error
+                    closest_waypoint = pose
+
+            if closest_waypoint:
+                waypoint_x = closest_waypoint.pose.position.x
+                waypoint_y = closest_waypoint.pose.position.y
+
+                # Vẽ đường nối giữa current position và closest waypoint
+                self.update_error(current_x, waypoint_x, current_y, waypoint_y)
+
+        # Cập nhật vị trí hiện tại nếu có thay đổi
         if current_x != self.last_x or current_y != self.last_y:
-            # self.get_logger().info(f"[amcl_callback] Updated Position: x={current_x}, y={current_y}")
             self.update_current_position(current_x, current_y)
+            self.insert_data(current_x, current_y, min_error, random.uniform(0.5, 1.5), random.uniform(0.5, 1.5))
+
+            self.rmse += min_error**2
+            rmse_value = sqrt(self.rmse / self.index)
+            self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
+            self.rmseLabel.adjustSize()
 
         self.last_x = current_x
         self.last_y = current_y
-
 
     def fault_callback(self, msg: Bool):
         if msg.data:
             self.light_color_error()
 
-
-
-def main(args=None):
-    rclpy.init(args=args)
-
-    app = QApplication([])
-
-    node = RobotUINode()
-    node.show()
-
-    # 💡 Tạo một thread để chạy rclpy.spin() song song với Qt GUI
-    ros_thread = Thread(target=rclpy.spin, args=(node,), daemon=True)
-    ros_thread.start()
-
-    # ✅ Đây là vòng lặp GUI (Qt sẽ chạy ở thread chính)
-    sys.exit(app.exec_())
 
 
 # def main(args=None):
@@ -257,21 +310,24 @@ def main(args=None):
 #     node = RobotUINode()
 #     node.show()
 
-#     # Tạo một timer trong Qt để xử lý ROS 2
-#     def ros_spin():
-#         rclpy.spin_once(node, timeout_sec=0.1)
+#     # 💡 Tạo một thread để chạy rclpy.spin() song song với Qt GUI
+#     ros_thread = Thread(target=rclpy.spin, args=(node,), daemon=True)
+#     ros_thread.start()
 
-#     qt_timer = QTimer()
-#     qt_timer.timeout.connect(ros_spin)
-#     qt_timer.start(10)  # ROS 2 sẽ được xử lý mỗi 10ms
-
-#     # Vòng lặp GUI (Qt sẽ chạy ở thread chính)
+#     # ✅ Đây là vòng lặp GUI (Qt sẽ chạy ở thread chính)
 #     sys.exit(app.exec_())
 
-#     # Đảm bảo ROS 2 được tắt khi thoát ứng dụng
-#     rclpy.shutdown()
 
-
+def main(args=None):
+    rclpy.init(args=args)
+    app = QApplication([])
+    node = RobotUINode()
+    node.show()
+    # Dùng QTimer để gọi spin_once định kỳ
+    spin_timer = QTimer()
+    spin_timer.timeout.connect(lambda: rclpy.spin_once(node, timeout_sec=0.0))
+    spin_timer.start(10)  # 10ms ~ 100Hz
+    sys.exit(app.exec_())
 
 if __name__ == "__main__":
     main()
