@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
-import numpy as np
-
 
 class speed_controlNode(Node):
     def __init__(self): # constructor 
@@ -19,7 +16,6 @@ class speed_controlNode(Node):
         self.wheel_separator = self.get_parameter('wheel_separator').value
 
         self.vel_sub_ = self.create_subscription(Twist, "/liem_controller/cmd_vel", self.velCallback, 10)
-
         self.wheel_cmd_pub_ = self.create_publisher(Float64MultiArray, '/liem_controller/wheel_rotational_vel' ,10)
 
     def velCallback(self, msg):
@@ -30,7 +26,6 @@ class speed_controlNode(Node):
 
         rpm_msgs = Float64MultiArray()
         rpm_msgs.data = [left, right]
-        # print(f"left: {left}, right: {right}")
 
         self.wheel_cmd_pub_.publish(rpm_msgs)
         

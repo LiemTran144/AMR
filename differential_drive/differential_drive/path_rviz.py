@@ -30,9 +30,8 @@ class PathPublisher(Node):
         #              orientation(quaternion)  
 
         self.timer = self.create_timer(1.0, self.publish_path)
-
-
         self.path_published = False
+
     def publish_path(self):
 
 

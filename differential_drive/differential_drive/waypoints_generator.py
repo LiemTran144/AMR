@@ -28,8 +28,6 @@ class ClickedWaypointNode(Node):
             self.csv_full_path = os.path.join(os.getcwd(), csv_path, csv_file)
         print(f"CSV file path: {self.csv_full_path}")
 
-
-
         # Initialize the CSV file with a header (overwrites any existing file)
         with open(self.csv_full_path, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)

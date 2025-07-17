@@ -131,7 +131,6 @@ class odom(Node):
         odom_msg.twist.twist.angular.z = self.angular_filtered
 
         self.odom_pub_.publish(odom_msg)
-        print("Odometry published")
 
         # # #TF
         # self.transform_stamped_.transform.translation.x = self.x_

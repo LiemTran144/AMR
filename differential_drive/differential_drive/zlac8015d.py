@@ -460,9 +460,7 @@ class ZLAC8015D_API:
     #     except Exception as e:
     #         self.self_node.get_logger().error(f"❌ Lỗi khi chuyển đổi số: {str(e)}")
     #         return None
-        
-
-
+    
     def stop_motor_emergency(self):
         """🛑 Gửi lệnh Emergency Stop để đảm bảo động cơ dừng ngay lập tức"""
         try:

@@ -22,8 +22,6 @@ class differentialDriveNode(Node):
         self.driver = ZLAC8015D_API(port,self)
         self.driver.clear_position(3) # clear both
 
-        # print("travel:", self.driver.get_wheels_travelled())
-
         # Thiết lập chế độ vận tốc và bật động cơ (nếu cần thiết)
         self.driver.set_mode(self.driver.VEL_CONTROL)
         self.driver.enable_motor()
@@ -52,8 +50,6 @@ class differentialDriveNode(Node):
         else:
             fault_msg.data = False
         self.fault_pub_.publish(fault_msg)
-
-
 
     def pub_JointState_Callback(self):
 
