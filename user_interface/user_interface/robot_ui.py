@@ -9,8 +9,6 @@ import mysql.connector
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
-from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtWidgets import QVBoxLayout
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
@@ -33,7 +31,7 @@ class RobotUI(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        loadUi("/home/liemtran/liem_ws/src/user_interface/ui/test.ui", self)
+        loadUi("/home/liemtran/liem_ws/src/user_interface/ui/projectD.ui", self)
         self.setWindowTitle("Mobile Robot Control")
         self.setGeometry(100, 100, 1300, 1000)
 

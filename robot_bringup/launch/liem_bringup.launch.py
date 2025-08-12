@@ -113,12 +113,13 @@ def generate_launch_description():
         }.items()
     )
     
-    rviz_node = Node(
+    rviz = Node(
         package='rviz2',
         executable='rviz2',
         name='rviz',
         arguments=['-d', os.path.join(get_package_share_directory(
             'robot_bringup'), 'rviz', 'display_rviz.rviz')])
+
 
     provide_map = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
@@ -129,10 +130,9 @@ def generate_launch_description():
         executable="safety_stop.py",
     )
     
-
     return LaunchDescription([
         rviz_path,
-        # rviz_node,
+        # rviz,
         joy_node,
         speed_control,
         differentialDrive,

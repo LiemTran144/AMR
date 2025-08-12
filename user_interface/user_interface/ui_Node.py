@@ -125,10 +125,10 @@ class RobotUINode(Node, RobotUI):
             self.update_current_position(current_x, current_y)
             self.insert_data(current_x, current_y, min_error, self.linear_vel, self.angular_vel)
 
-            self.rmse += min_error**2
-            rmse_value = sqrt(self.rmse / self.index)
-            self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
-            self.rmseLabel.adjustSize()
+            # self.rmse += min_error**2
+            # rmse_value = sqrt(self.rmse / self.index)
+            # self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
+            # self.rmseLabel.adjustSize()
 
         self.last_x = current_x
         self.last_y = current_y
