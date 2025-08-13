@@ -55,7 +55,7 @@ class SafetyStop(Node):
         warning_zone.id = 0
         warning_zone.action = Marker.ADD
         warning_zone.type = Marker.CYLINDER
-        warning_zone.scale.z = 0.001
+        warning_zone.scale.z = 0.002
         warning_zone.scale.x = self.warning_distance * 2
         warning_zone.scale.y = self.warning_distance * 2
         warning_zone.color.r = 1.0
