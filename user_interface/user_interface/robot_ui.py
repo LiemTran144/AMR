@@ -12,7 +12,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
-
+import pandas as pd
 # Constants
 INDICATOR_STYLE = (
     "border-radius: 35px;"
@@ -31,7 +31,7 @@ class RobotUI(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        loadUi("/home/liemtran/liem_ws/src/user_interface/ui/projectD.ui", self)
+        loadUi("/home/liemtran/liem_ws/src/user_interface/ui/test.ui", self)
         self.setWindowTitle("Mobile Robot Control")
         self.setGeometry(100, 100, 1300, 1000)
 
@@ -89,6 +89,7 @@ class RobotUI(QMainWindow):
         self.angularFilterCheckBox.stateChanged.connect(self.toggle_filters)
         self.filterButton.clicked.connect(self.filter_data)
         self.exportButton.clicked.connect(self.export_to_pdf)
+        self.exportExcelButton.clicked.connect(self.export_to_excel)
 
         # Set initial indicator state
         self.set_indicator_state("stop")
@@ -314,6 +315,7 @@ class RobotUI(QMainWindow):
             self.dataTableView.setModel(model)
             self.dataTableView.resizeColumnsToContents()
             self.dataTableView.resizeRowsToContents()
+            self.dataLabel.setText(f"✅ Filtered data: {len(rows)} rows found")
         except Exception as e:
             self.dataLabel.setText(f"❌ Error filtering data: {e}")
             self.dataLabel.adjustSize()
@@ -331,7 +333,7 @@ class RobotUI(QMainWindow):
         elements.extend(
             [
                 Paragraph("Project D - Robot Log Report", styles["Title"]),
-                Paragraph("Reporter: Tran Trung Liem ID: 2131100018", styles["Normal"]),
+                Paragraph(f"Reporter: {self.reporterTextBox.toPlainText()} ID: {self.idTextBox.toPlainText()}", styles["Normal"]),
                 Paragraph(f"Export Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles["Normal"]),
                 Paragraph(f"Table Name: {self.tableNameTextEdit.toPlainText()}", styles["Normal"]),
                 Spacer(1, 12),
@@ -376,6 +378,44 @@ class RobotUI(QMainWindow):
         elements.append(table)
         doc.build(elements)
         self.dataLabel.setText(f"✅ Exported to PDF: {file_path}")
+        self.dataLabel.adjustSize()
+
+    def export_to_excel(self):
+        """Export table data to a CSV file."""
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Save CSV", "", "CSV Files (*.csv)"
+        )
+        if not file_path:
+            return
+
+        # Đảm bảo file có đuôi .csv
+        if not file_path.lower().endswith('.csv'):
+            file_path += '.csv'
+
+        model = self.dataTableView.model()
+        if model is None:
+            self.dataLabel.setText("❌ No data to export")
+            self.dataLabel.adjustSize()
+            return
+
+        # Lấy header và dữ liệu
+        headers = [model.headerData(col, QtCore.Qt.Horizontal) for col in range(model.columnCount())]
+        data = []
+        for row in range(model.rowCount()):
+            row_data = []
+            for col in range(model.columnCount()):
+                index = model.index(row, col)
+                value = str(model.data(index))
+                row_data.append(value)
+            data.append(row_data)
+
+        # Ghi ra file CSV
+        try:
+            df = pd.DataFrame(data, columns=headers)
+            df.to_csv(file_path, index=False)
+            self.dataLabel.setText(f"✅ Exported to CSV: {file_path}")
+        except Exception as e:
+            self.dataLabel.setText(f"❌ Error exporting to CSV: {e}")
         self.dataLabel.adjustSize()
 
     def closeEvent(self, event):
