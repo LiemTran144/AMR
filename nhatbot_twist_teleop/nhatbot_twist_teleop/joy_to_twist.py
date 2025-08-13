@@ -13,8 +13,8 @@ class JoyToTwistNode(Node):
         self.declare_parameter("angular_scale", 0.1)         # Hệ số tốc độ quay
         self.declare_parameter("deadman_button", 9)          # Nút giữ để di chuyển
         self.declare_parameter("deadzone_threshold", 0.1)    # Ngưỡng tối thiểu tránh trôi
-        self.declare_parameter("axis_linear_x", 1)          # Trục điều khiển tiến/lùi
-        self.declare_parameter("axis_angular_z", 2)         # Trục điều khiển quay trái/phải
+        self.declare_parameter("axis_linear_x", 1)           # Trục điều khiển tiến/lùi
+        self.declare_parameter("axis_angular_z", 2)          # Trục điều khiển quay trái/phải
 
         # Lấy giá trị từ tham số ROS 2
         self.linear_scale = self.get_parameter("linear_scale").get_parameter_value().double_value
