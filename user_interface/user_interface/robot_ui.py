@@ -1,11 +1,13 @@
-#! /usr/bin/env python3
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFileDialog
 from PyQt5.uic import loadUi
 import numpy as np
 import pyqtgraph as pg
+from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 from pyqtgraph.Qt import QtCore
 import csv
+
 import mysql.connector
+from mysql.connector import Error
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
@@ -13,75 +15,86 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 import pandas as pd
-# Constants
-INDICATOR_STYLE = (
-    "border-radius: 35px;"
-    "border: 2px solid black;"
-)
-COLORS = {
-    "stop": "gold",
-    "run": "lime",
-    "error": "red",
-    "default": "lightgray",
-}
-PLOT_THRESHOLD = 1.0
+
+def mydb(self):
+    try:
+        # 1. Tạo tên bảng theo ngày
+        today_str = datetime.now().strftime("%Y%m%d")
+        self.table = f"data_{today_str}"
+
+        # 2. Kết nối tới MySQL
+        self.connection = mysql.connector.connect(
+            host='localhost',
+            user='liemtran',
+            password='Liempk1234@',
+            database='test1'
+        )
+        self.connection.autocommit = True
+
+        if self.connection.is_connected():
+            self.dataLabel.setText("✅ Successfully connect to MySQL")
+            self.dataLabel.adjustSize()
+
+            self.cursor = self.connection.cursor()
+
+            # 3. Tạo bảng nếu chưa tồn tại
+            self.cursor.execute(f"""
+                CREATE TABLE IF NOT EXISTS {self.table} (
+                    date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    x DOUBLE,
+                    y DOUBLE,
+                    error DOUBLE,
+                    linear_vel DOUBLE,
+                    angular_vel DOUBLE
+                )
+            """)
+    except mysql.connector.Error as e:
+        print(f"❌ Lỗi MySQL: {e}")
 
 class RobotUI(QMainWindow):
-    """Main UI class for controlling and visualizing a mobile robot."""
-
     def __init__(self):
         super().__init__()
         loadUi("/home/liemtran/liem_ws/src/user_interface/ui/test.ui", self)
+        # loadUi("/home/liemtran/liem_ws/src/user_interface/ui/final.ui", self)
+
         self.setWindowTitle("Mobile Robot Control")
-        self.setGeometry(100, 100, 1300, 1000)
+        self.setGeometry(100, 100, 1300, 1000)  # Set window size and position        
+        self.light_color_stop()
 
-        # Initialize plot widget
         self.plot_widget = pg.PlotWidget()
-        self.plot_widget.setBackground("w")
-        plot_layout = QVBoxLayout()
-        plot_layout.addWidget(self.plot_widget)
-        self.plotGroupBox.setLayout(plot_layout)
+        self.plot_widget.setBackground('w')  # 'w' viết tắt cho white
+        plot_layout = QVBoxLayout()              # Tạo layout
+        plot_layout.addWidget(self.plot_widget)            # Thêm plot vào layout
+        self.plotGroupBox.setLayout(plot_layout)           # Gán layout vào groupbox
 
-        # Set plot labels and properties
-        self.plot_widget.setLabel("left", "Y")
-        self.plot_widget.setLabel("bottom", "X")
-        self.plot_widget.setAspectLocked(True)
-        self.plot_widget.addLegend(offset=(0, 10))
+        # Gán tên cho từng trục
+        # self.plot_widget.setLabel('left', 'Y Axis', units='m')       # trục Y
+        # self.plot_widget.setLabel('bottom', 'X Axis', units='m')     # trục X
 
-        # Initialize data lists
-        self.setpoint_x = []
-        self.setpoint_y = []
+        self.plot_widget.setLabel('left', 'Y')       # trục Y
+        self.plot_widget.setLabel('bottom', 'X')     # trục X        
+        self.plot_widget.setAspectLocked(True) # Giữ tỉ lệ khung hình cố định
+
+        self.setpoint_x= []
+        self.setpoint_y= []
         self.current_x = []
         self.current_y = []
+        self.plot_widget.addLegend(offset=(0, 10))
+        # Tạo plot
+        self.curve_setpoint = self.plot_widget.plot(self.setpoint_x, self.setpoint_y,
+                                                    pen=pg.mkPen(color=(0,0,255), width=4), name="Waypoints (Setpoint)")
+        self.curve_current = self.plot_widget.plot(self.current_x, self.current_y,
+                                                pen=pg.mkPen(color=(0,255,0), width=4), name="Current_Position")
+        
         self.error_x = []
         self.error_y = []
-
-        # Initialize plot curves
-        self.curve_setpoint = self.plot_widget.plot(
-            self.setpoint_x,
-            self.setpoint_y,
-            pen=pg.mkPen(color=(0, 0, 255), width=4),
-            name="Waypoints (Setpoint)",
-        )
-        self.curve_current = self.plot_widget.plot(
-            self.current_x,
-            self.current_y,
-            pen=pg.mkPen(color=(0, 255, 0), width=4),
-            name="Current_Position",
-        )
-        self.curve_error = self.plot_widget.plot(
-            self.error_x,
-            self.error_y,
-            pen=pg.mkPen(color=(255, 0, 0), width=4),
-            name="Error",
-        )
-
-        # Initialize database
-        self.connect_to_database()
-
-        # Connect UI signals
-        self.clearGraphButton.clicked.connect(self.clear_graph)
+        self.curve_error = self.plot_widget.plot(self.error_x,self.error_y ,
+                                                pen=pg.mkPen(color=(255,0,0), width=4), name="Error")
+        #database
+        mydb(self)
+        self.clearGraphButton.clicked.connect(self.clearGraph)
         self.tableNameTextEdit.setText(self.table)
+
         self.dateFilterCheckBox.stateChanged.connect(self.toggle_filters)
         self.timeFilterCheckBox.stateChanged.connect(self.toggle_filters)
         self.errorFilterCheckBox.stateChanged.connect(self.toggle_filters)
@@ -91,188 +104,20 @@ class RobotUI(QMainWindow):
         self.exportButton.clicked.connect(self.export_to_pdf)
         self.exportExcelButton.clicked.connect(self.export_to_excel)
 
-        # Set initial indicator state
-        self.set_indicator_state("stop")
-
-    # Database Methods
-    def connect_to_database(self):
-        """Connect to MySQL database and create table if it doesn't exist."""
-        try:
-            today_str = datetime.now().strftime("%Y%m%d")
-            self.table = f"data_{today_str}"
-
-            self.connection = mysql.connector.connect(
-                host="localhost",
-                user="liemtran",
-                password="Liempk1234@",
-                database="test1",
-            )
-            self.connection.autocommit = True
-
-            if self.connection.is_connected():
-                self.dataLabel.setText("✅ Successfully connected to MySQL")
-                self.dataLabel.adjustSize()
-
-                self.cursor = self.connection.cursor()
-                self.cursor.execute(
-                    f"""
-                    CREATE TABLE IF NOT EXISTS {self.table} (
-                        date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        x DOUBLE,
-                        y DOUBLE,
-                        error DOUBLE,
-                        linear_vel DOUBLE,
-                        angular_vel DOUBLE
-                    )
-                    """
-                )
-        except mysql.connector.Error as e:
-            self.dataLabel.setText(f"❌ MySQL Error: {e}")
-            self.dataLabel.adjustSize()
-
-    def insert_data(self, x, y, error, linear_vel, angular_vel):
-        """Insert data into the database."""
-        table_name = self.tableNameTextEdit.toPlainText()
-        rounded_values = (
-            round(x, 4),
-            round(y, 4),
-            round(error, 4),
-            round(linear_vel, 4),
-            round(angular_vel, 4),
-        )
-
-        try:
-            self.cursor.execute(f"SHOW TABLES LIKE '{table_name}'")
-            if self.cursor.fetchone():
-                self.cursor.execute(
-                    f"""
-                    INSERT INTO {table_name} (x, y, error, linear_vel, angular_vel)
-                    VALUES (%s, %s, %s, %s, %s)
-                    """,
-                    rounded_values,
-                )
-        except mysql.connector.Error as e:
-            self.dataLabel.setText(f"❌ Error inserting data: {e}")
-            self.dataLabel.adjustSize()
-
-    def show_data(self):
-        """Display data from the database in the table view."""
-        table_name = self.tableNameTextEdit.toPlainText()
-
-        try:
-            self.cursor.execute(f"SHOW TABLES LIKE '{table_name}'")
-            if self.cursor.fetchone():
-                self.cursor.execute(f"SHOW COLUMNS FROM {table_name}")
-                columns = [column[0] for column in self.cursor.fetchall()]
-
-                self.cursor.execute(f"SELECT * FROM {table_name}")
-                rows = self.cursor.fetchall()
-
-                model = QStandardItemModel()
-                model.setHorizontalHeaderLabels(columns)
-
-                for row in rows:
-                    items = [QStandardItem(str(cell)) for cell in row]
-                    model.appendRow(items)
-
-                self.dataTableView.setModel(model)
-                self.dataTableView.resizeColumnsToContents()
-                self.dataTableView.resizeRowsToContents()
-                self.dataTableView.scrollToBottom()
-        except mysql.connector.Error as e:
-            self.dataLabel.setText(f"❌ Error fetching data: {e}")
-            self.dataLabel.adjustSize()
-
-    # Plotting Methods
-    def plot_setpoint(self, file_path):
-        """Plot setpoint data from a CSV file."""
-        self.setpoint_x = []
-        self.setpoint_y = []
-
-        try:
-            with open(file_path, "r") as file:
-                reader = csv.reader(file)
-                next(reader)  # Skip header
-                for row in reader:
-                    if len(row) >= 2:
-                        try:
-                            self.setpoint_x.append(float(row[0]))
-                            self.setpoint_y.append(float(row[1]))
-                        except ValueError:
-                            continue
-            self.num_points = len(self.setpoint_x)
-            self.curve_setpoint.setData(self.setpoint_x, self.setpoint_y)
-        except Exception as e:
-            self.dataLabel.setText(f"❌ Error plotting setpoint: {e}")
-            self.dataLabel.adjustSize()
-
-    def update_current_position(self, x, y):
-        """Update the current position on the plot."""
-        if not self.current_x:
-            self.current_x.append(x)
-            self.current_y.append(y)
-        else:
-            x_prev, y_prev = self.current_x[-1], self.current_y[-1]
-            if abs(x - x_prev) > PLOT_THRESHOLD or abs(y - y_prev) > PLOT_THRESHOLD:
-                self.current_x.append(np.nan)
-                self.current_y.append(np.nan)
-            self.current_x.append(x)
-            self.current_y.append(y)
-
-        self.curve_current.setData(self.current_x, self.current_y)
-        self.xCurrentPos.display(x)
-        self.yCurrentPos.display(y)
-
-    def update_error(self, current_x, waypoint_x, current_y, waypoint_y):
-        """Update the error line on the plot."""
-        self.error_x.extend([np.nan, current_x, waypoint_x])
-        self.error_y.extend([np.nan, current_y, waypoint_y])
-        self.curve_error.setData(self.error_x, self.error_y)
-
-    def clear_graph(self):
-        """Clear all data from the plot."""
-        self.setpoint_x.clear()
-        self.setpoint_y.clear()
-        self.current_x.clear()
-        self.current_y.clear()
-        self.error_x.clear()
-        self.error_y.clear()
-        self.curve_setpoint.setData([], [])
-        self.curve_current.setData([], [])
-        self.curve_error.setData([], [])
-        self.pathLabel.clear()
-
-    # UI Methods
-    def set_indicator_state(self, state):
-        """Set the state of the indicator lights."""
-        for indicator, color in [
-            (self.stopIndicator, "stop"),
-            (self.runIndicator, "run"),
-            (self.errorIndicator, "error"),
-        ]:
-            indicator_color = COLORS[state] if indicator == getattr(self, f"{state}Indicator") else COLORS["default"]
-            indicator.setStyleSheet(f"background-color: {indicator_color};{INDICATOR_STYLE}")
-
-    def update_velocity(self, linear, angular):
-        """Update the displayed velocity values."""
-        self.linearVel.display(linear)
-        self.angularVel.display(angular)
-
     def toggle_filters(self):
-        """Enable or disable filter inputs based on checkbox state."""
         self.dateEdit.setEnabled(self.dateFilterCheckBox.isChecked())
         self.timeEdit.setEnabled(self.timeFilterCheckBox.isChecked())
         self.errorEdit.setEnabled(self.errorFilterCheckBox.isChecked())
         self.linearEdit.setEnabled(self.linearFilterCheckBox.isChecked())
         self.angularEdit.setEnabled(self.angularFilterCheckBox.isChecked())
 
+
     def filter_data(self):
-        """Filter data in the table view based on user inputs."""
         table_name = self.tableNameTextEdit.toPlainText()
         conditions = []
 
         if self.dateFilterCheckBox.isChecked():
-            date_str = self.dateEdit.date().toString("yyyy-MM-dd")
+            date_str = self.dateEdit.date().toString('yyyy-MM-dd')
             conditions.append(f"DATE(date) = '{date_str}'")
 
         if self.timeFilterCheckBox.isChecked():
@@ -293,20 +138,62 @@ class RobotUI(QMainWindow):
             angular_cond = self.angularEdit.toPlainText().strip()
             if angular_cond:
                 conditions.append(f"angular_vel {angular_cond}")
-
-        query = (
-            f"SELECT * FROM {table_name} WHERE {' AND '.join(conditions)}"
-            if conditions
-            else f"SELECT * FROM {table_name}"
-        )
-
+        query = f"SELECT * FROM {table_name} WHERE " + " AND ".join(conditions)
+        if not conditions:
+            query = f"SELECT * FROM {table_name}"  # Nếu không có điều kiện, lấy tất cả dữ liệu
         try:
             self.cursor.execute(query)
             rows = self.cursor.fetchall()
+
+            # Cập nhật bảng
             model = QStandardItemModel()
-            model.setHorizontalHeaderLabels(
-                ["Date", "X", "Y", "Error", "Linear Vel", "Angular Vel"]
-            )
+            model.setHorizontalHeaderLabels(["Date", "X", "Y", "Error", "Linear Vel", "Angular Vel"])
+            for row in rows:
+                items = [QStandardItem(str(cell)) for cell in row]
+                model.appendRow(items)
+
+            self.dataTableView.setModel(model)
+            self.dataTableView.resizeColumnsToContents()
+            self.dataTableView.resizeRowsToContents()
+
+        except Exception as e:
+            #english
+            self.dataLabel.setText(f"❌ Error filtering data: {e}")
+            self.dataLabel.adjustSize()
+
+    def insert_data(self, x, y, error, linear_vel, angular_vel):
+        table_name = self.tableNameTextEdit.toPlainText()
+
+        # Kiểm tra xem bảng có tồn tại không
+        self.cursor.execute(f"SHOW TABLES LIKE '{table_name}'")
+        result = self.cursor.fetchone()
+
+        if result:
+            # Chèn dữ liệu vào bảng
+            self.cursor.execute(f"""
+                INSERT INTO {table_name} (x, y, error, linear_vel, angular_vel)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (x, y, error, linear_vel, angular_vel))
+
+    def show_data(self):
+        table_name = self.tableNameTextEdit.toPlainText()
+
+        # Kiểm tra xem bảng có tồn tại không
+        self.cursor.execute(f"SHOW TABLES LIKE '{table_name}'")
+        result = self.cursor.fetchone()
+
+        if result:
+            # Lấy danh sách các cột từ bảng
+            self.cursor.execute(f"SHOW COLUMNS FROM {table_name}")
+            columns = [column[0] for column in self.cursor.fetchall()]  # Lấy tên các cột
+
+            # Lấy dữ liệu từ bảng
+            self.cursor.execute(f"SELECT * FROM {table_name}")
+            rows = self.cursor.fetchall()
+
+            # Tạo model và gán vào QTableView
+            model = QStandardItemModel()
+            model.setHorizontalHeaderLabels(columns)  # Sử dụng danh sách cột làm header
 
             for row in rows:
                 items = [QStandardItem(str(cell)) for cell in row]
@@ -315,10 +202,76 @@ class RobotUI(QMainWindow):
             self.dataTableView.setModel(model)
             self.dataTableView.resizeColumnsToContents()
             self.dataTableView.resizeRowsToContents()
-            self.dataLabel.setText(f"✅ Filtered data: {len(rows)} rows found")
-        except Exception as e:
-            self.dataLabel.setText(f"❌ Error filtering data: {e}")
-            self.dataLabel.adjustSize()
+            self.dataTableView.scrollToBottom()
+
+    def clearGraph(self):
+        self.setpoint_x.clear()
+        self.setpoint_y.clear()
+        self.current_x.clear()
+        self.current_y.clear()
+        self.curve_setpoint.setData([], [])
+        self.curve_current.setData([], [])
+        self.pathLabel.clear()
+
+    def plot_setpoint(self, file_path):
+        self.setpoint_x = []
+        self.setpoint_y = []
+
+        with open(file_path, 'r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Bỏ dòng tiêu đề
+
+            for row in reader:
+                if len(row) >= 2:
+                    try:
+                        x = float(row[0])
+                        y = float(row[1])
+                        self.setpoint_x.append(x)
+                        self.setpoint_y.append(y)
+                    except ValueError:
+                        continue  # Bỏ qua dòng không hợp lệ
+
+        self.num_points = len(self.setpoint_x)
+        self.curve_setpoint.setData(self.setpoint_x, self.setpoint_y)
+
+
+    def update_current_position(self, x, y):
+
+        if not self.current_x:
+            self.current_x.append(x)
+            self.current_y.append(y)
+        else:
+            x_prev = self.current_x[-1]
+            y_prev = self.current_y[-1]
+
+            dx = abs(x - x_prev)
+            dy = abs(y - y_prev)
+            threshold = 1.0  
+
+            if dx > threshold or dy > threshold:
+
+                self.current_x.append(np.nan)
+                self.current_y.append(np.nan)
+
+            self.current_x.append(x)
+            self.current_y.append(y)
+
+        self.curve_current.setData(self.current_x, self.current_y)
+
+        self.xCurrentPos.display(x)
+        self.yCurrentPos.display(y)
+    
+    def update_error(self, current_x, waypoint_x, current_y, waypoint_y):
+        # Thêm đoạn đường mới vào danh sách
+        self.error_x.extend([np.nan, current_x, waypoint_x])  # Sử dụng np.nan để ngắt đoạn
+        self.error_y.extend([np.nan, current_y, waypoint_y])
+
+        # Cập nhật dữ liệu lên đồ thị
+        self.curve_error.setData(self.error_x, self.error_y)
+
+    def update_Velocity(self, linear, angular):
+        self.linearVel.display(linear)
+        self.angularVel.display(angular)
 
     def export_to_pdf(self):
         """Export table data to a PDF file."""
@@ -418,9 +371,42 @@ class RobotUI(QMainWindow):
             self.dataLabel.setText(f"❌ Error exporting to CSV: {e}")
         self.dataLabel.adjustSize()
 
+    def light_color_stop(self):
+        self.stopIndicator.setStyleSheet("background-color: gold;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+        self.runIndicator.setStyleSheet("background-color: lightgray;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+        self.errorIndicator.setStyleSheet("background-color: lightgray;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+    def light_color_run(self):
+        self.runIndicator.setStyleSheet("background-color: lime;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+        
+        self.stopIndicator.setStyleSheet("background-color: lightgray;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+        
+        self.errorIndicator.setStyleSheet("background-color: lightgray;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+        
+    def light_color_error(self):
+        self.errorIndicator.setStyleSheet("background-color: red;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+        self.runIndicator.setStyleSheet("background-color: lightgray;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
+        self.stopIndicator.setStyleSheet("background-color: lightgray;"
+                                         "border-radius: 35px;" 
+                                         "border: 2px solid black;")
     def closeEvent(self, event):
-        """Close database connection when the window is closed."""
-        if hasattr(self, "connection") and self.connection.is_connected():
+        # Đóng kết nối MySQL nếu đang mở
+        if hasattr(self, 'connection') and self.connection.is_connected():
             self.cursor.close()
             self.connection.close()
         event.accept()
