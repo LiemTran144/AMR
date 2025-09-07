@@ -54,7 +54,7 @@ def mydb(self):
 class RobotUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        loadUi("/home/liemtran/liem_ws/src/user_interface/ui/test.ui", self)
+        loadUi("/home/liemtran/liem_ws/src/user_interface/ui/projectD.ui", self)
         # loadUi("/home/liemtran/liem_ws/src/user_interface/ui/final.ui", self)
 
         self.setWindowTitle("Mobile Robot Control")
@@ -65,14 +65,14 @@ class RobotUI(QMainWindow):
         self.plot_widget.setBackground('w')  # 'w' viết tắt cho white
         plot_layout = QVBoxLayout()              # Tạo layout
         plot_layout.addWidget(self.plot_widget)            # Thêm plot vào layout
-        self.plotGroupBox.setLayout(plot_layout)           # Gán layout vào groupbox
+        self.trackingPlot.setLayout(plot_layout)           # Gán layout vào groupbox
 
         # Gán tên cho từng trục
-        # self.plot_widget.setLabel('left', 'Y Axis', units='m')       # trục Y
-        # self.plot_widget.setLabel('bottom', 'X Axis', units='m')     # trục X
+        self.plot_widget.setLabel('left', 'Y Axis', units='m')       # trục Y
+        self.plot_widget.setLabel('bottom', 'X Axis', units='m')     # trục X
 
-        self.plot_widget.setLabel('left', 'Y')       # trục Y
-        self.plot_widget.setLabel('bottom', 'X')     # trục X        
+        # self.plot_widget.setLabel('left', 'Y(m)')       # trục Ys
+        # self.plot_widget.setLabel('bottom', 'X(m)')     # trục X        
         self.plot_widget.setAspectLocked(True) # Giữ tỉ lệ khung hình cố định
 
         self.setpoint_x= []
@@ -82,14 +82,35 @@ class RobotUI(QMainWindow):
         self.plot_widget.addLegend(offset=(0, 10))
         # Tạo plot
         self.curve_setpoint = self.plot_widget.plot(self.setpoint_x, self.setpoint_y,
-                                                    pen=pg.mkPen(color=(0,0,255), width=4), name="Waypoints (Setpoint)")
+                                                    pen=pg.mkPen(color=(0,0,255), width=4), name="Waypoints")
         self.curve_current = self.plot_widget.plot(self.current_x, self.current_y,
-                                                pen=pg.mkPen(color=(0,255,0), width=4), name="Current_Position")
+                                                pen=pg.mkPen(color=(0,255,0), width=4), name="Current Position")
         
         self.error_x = []
         self.error_y = []
         self.curve_error = self.plot_widget.plot(self.error_x,self.error_y ,
-                                                pen=pg.mkPen(color=(255,0,0), width=4), name="Error")
+                                                pen=pg.mkPen(color=(255,0,0), width=1), name="Error")
+        
+
+        #plot error
+        self.error_plot_widget = pg.PlotWidget()
+        self.error_plot_widget.setBackground('w')
+        self.error_plot_widget.setLabel('left', 'Error (m)')
+        self.error_plot_widget.setLabel('bottom', 'Index')
+        self.error_plot_widget.addLegend(offset=(0, 10))
+        self.error_plot_curve = self.error_plot_widget.plot([], [],
+                                                            pen=pg.mkPen(color=(255,0,0), width=3),
+                                                            name="Error")
+        # Thêm error_plot_widget vào một layout hoặc groupbox trên UI
+        self.errorLayout = QVBoxLayout() 
+        self.errorLayout.addWidget(self.error_plot_widget)  # errorPlotLayout là QVBoxLayout trong .ui
+        self.errorPlot.setLayout(self.errorLayout)
+        self.error_history = []
+
+
+
+
+
         #database
         mydb(self)
         self.clearGraphButton.clicked.connect(self.clearGraph)
@@ -103,6 +124,11 @@ class RobotUI(QMainWindow):
         self.filterButton.clicked.connect(self.filter_data)
         self.exportButton.clicked.connect(self.export_to_pdf)
         self.exportExcelButton.clicked.connect(self.export_to_excel)
+
+
+    def update_error_plot(self, error_value):
+        self.error_history.append(error_value)
+        self.error_plot_curve.setData(list(range(len(self.error_history))), self.error_history)
 
     def toggle_filters(self):
         self.dateEdit.setEnabled(self.dateFilterCheckBox.isChecked())

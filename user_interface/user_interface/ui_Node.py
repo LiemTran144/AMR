@@ -276,6 +276,7 @@ class RobotUINode(Node, RobotUI):
                     min_error = error
                     closest_waypoint = pose
 
+
             if closest_waypoint:
                 waypoint_x = closest_waypoint.pose.position.x
                 waypoint_y = closest_waypoint.pose.position.y
@@ -287,11 +288,12 @@ class RobotUINode(Node, RobotUI):
         if current_x != self.last_x or current_y != self.last_y:
             self.update_current_position(current_x, current_y)
             self.insert_data(current_x, current_y, min_error, random.uniform(0.5, 1.5), random.uniform(0.5, 1.5))
-
-            self.rmse += min_error**2
-            rmse_value = sqrt(self.rmse / self.index)
-            self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
-            self.rmseLabel.adjustSize()
+            print(f"Min error to closest waypoint: {min_error:.4f}")
+            self.update_error_plot(min_error)
+            # self.rmse += min_error**2
+            # rmse_value = sqrt(self.rmse / self.index)
+            # self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
+            # self.rmseLabel.adjustSize()
 
         self.last_x = current_x
         self.last_y = current_y
