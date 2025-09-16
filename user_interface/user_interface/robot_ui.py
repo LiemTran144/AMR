@@ -58,7 +58,7 @@ class RobotUI(QMainWindow):
         # loadUi("/home/liemtran/liem_ws/src/user_interface/ui/final.ui", self)
 
         self.setWindowTitle("Mobile Robot Control")
-        self.setGeometry(100, 100, 1300, 1000)  # Set window size and position        
+        self.setGeometry(100, 100, 1156, 659)  # Set window size and position        
         self.light_color_stop()
 
         self.plot_widget = pg.PlotWidget()
@@ -96,7 +96,7 @@ class RobotUI(QMainWindow):
         self.error_plot_widget = pg.PlotWidget()
         self.error_plot_widget.setBackground('w')
         self.error_plot_widget.setLabel('left', 'Error (m)')
-        self.error_plot_widget.setLabel('bottom', 'Index')
+        self.error_plot_widget.setLabel('bottom', 'Time (0.1s)')
         self.error_plot_widget.addLegend(offset=(0, 10))
         self.error_plot_curve = self.error_plot_widget.plot([], [],
                                                             pen=pg.mkPen(color=(255,0,0), width=3),
@@ -106,10 +106,6 @@ class RobotUI(QMainWindow):
         self.errorLayout.addWidget(self.error_plot_widget)  # errorPlotLayout là QVBoxLayout trong .ui
         self.errorPlot.setLayout(self.errorLayout)
         self.error_history = []
-
-
-
-
 
         #database
         mydb(self)
@@ -235,8 +231,13 @@ class RobotUI(QMainWindow):
         self.setpoint_y.clear()
         self.current_x.clear()
         self.current_y.clear()
+        self.error_x.clear()
+        self.error_y.clear()
+        self.error_history.clear()
+        self.error_plot_curve.setData([], [])
         self.curve_setpoint.setData([], [])
         self.curve_current.setData([], [])
+
         self.pathLabel.clear()
 
     def plot_setpoint(self, file_path):

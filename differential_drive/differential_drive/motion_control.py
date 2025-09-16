@@ -18,7 +18,7 @@ class PDMotionPlanner(Node):
 
         # Parameters
         self.declare_parameter("kp", 1.5)
-        self.declare_parameter("kd", 0.0)
+        self.declare_parameter("kd", 0.01)
         self.declare_parameter("step_size", 0.2)
         self.declare_parameter("max_linear_velocity", 0.1)
         self.declare_parameter("max_angular_velocity", 0.2)
@@ -30,6 +30,8 @@ class PDMotionPlanner(Node):
         self.max_linear_velocity = self.get_parameter("max_linear_velocity").value
         self.max_angular_velocity = self.get_parameter("max_angular_velocity").value
         self.deathband = self.get_parameter("deathband").value
+
+        print(f"PD Motion Planner parameters: kp={self.kp}, kd={self.kd}, step_size={self.step_size}, max_linear_velocity={self.max_linear_velocity}, max_angular_velocity={self.max_angular_velocity}, deathband={self.deathband}")
 
         # Subscribers and publishers
         self.path_sub = self.create_subscription(Path, '/liem/ui_path', self.path_callback, 10)
@@ -138,9 +140,6 @@ class PDMotionPlanner(Node):
         # Extract relative position and orientation
         angular_error = next_pose_robot_tf[1, 3]
         linear_error = next_pose_robot_tf[0, 3] 
-        print(f"linear error: {linear_error}")
-        print(f"anglular: {angular_error}")
-
     
         dt = (self.get_clock().now() - self.last_cycle_time).nanoseconds * 1e-9
 

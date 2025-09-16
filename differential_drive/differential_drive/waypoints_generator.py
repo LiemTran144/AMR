@@ -6,13 +6,16 @@ from visualization_msgs.msg import Marker
 import csv
 import os
 import math
+import time
+
 
 class ClickedWaypointNode(Node):
     def __init__(self):
         super().__init__('clicked_waypoint_node')
         # Declare parameters and retrieve their values
-        self.declare_parameter('csv_path', '/home/liemtran/liem_ws/src/user_interface/user_interface')
-        self.declare_parameter('csv_file', 'waypoint0509.csv')
+        csv_time = time.strftime("%Y%m%d-%H%M%S")
+        self.declare_parameter('csv_path', '/home/liemtran/liem_ws/src/user_interface/data')
+        self.declare_parameter('csv_file', 'waypoints_' + csv_time + '.csv')
         self.declare_parameter('interpolation_precision', 10)
         self.declare_parameter('clicked_point_topic', '/clicked_point')
 

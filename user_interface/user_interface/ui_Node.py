@@ -32,7 +32,7 @@ class RobotUINode(Node, RobotUI):
 
         # self.group_Reent_ = ReentrantCallbackGroup()
 
-        self.cmd_pub = self.create_publisher(Twist, "/liem_controller/cmd_vel", 10)  #'/UI/cmd_vel'
+        self.cmd_pub = self.create_publisher(Twist,'/UI/cmd_vel', 10)  #  /liem_controller/cmd_vel
         self.nav_pub = self.create_publisher(Path, '/liem/ui_path', 10)
 
         self.odom_sub = self.create_subscription(Odometry,'/liem_controller/odom',self.odom_callback, 10) #, callback_group=self.group_Reent_
@@ -189,7 +189,6 @@ class RobotUINode(Node, RobotUI):
         if self.path_msg:
             self.path_msg.header.stamp = self.get_clock().now().to_msg()
             self.nav_pub.publish(self.path_msg)
-            self.get_logger().info(f"[TIMER] Published path ({len(self.path_msg.poses)} poses)")
         else:
 
             if self.path_timer.isActive():
@@ -207,53 +206,6 @@ class RobotUINode(Node, RobotUI):
         else:
             self.light_color_run()
 
-    # def amcl_callback(self, msg: PoseWithCovarianceStamped):
-    #     current_x = msg.pose.pose.position.x
-    #     current_y = msg.pose.pose.position.y
-
-    #     if current_x != self.last_x or current_y != self.last_y:
-    #         # self.get_logger().info(f"[amcl_callback] Updated Position: x={current_x}, y={current_y}")
-    #         self.update_current_position(current_x, current_y)
-
-    #     self.last_x = current_x
-    #     self.last_y = current_y
-
-
-    # def amcl_callback(self, msg: PoseWithCovarianceStamped):
-    #     current_x = msg.pose.pose.position.x
-    #     current_y = msg.pose.pose.position.y
-    #     self.index += 1
-    #     if self.path_msg and self.path_msg.poses:
-    #         # Tìm waypoint gần nhất
-    #         min_error = float('inf')
-    #         closest_waypoint = None
-
-    #         for pose in self.path_msg.poses:
-    #             waypoint_x = pose.pose.position.x
-    #             waypoint_y = pose.pose.position.y
-
-    #             # Tính khoảng cách Euclidean
-    #             error = sqrt((current_x - waypoint_x)**2 + (current_y - waypoint_y)**2)
-
-    #             if error < min_error:
-    #                 min_error = error
-    #                 closest_waypoint = pose
-
-
-    #     # Cập nhật vị trí hiện tại nếu có thay đổi
-    #     if current_x != self.last_x or current_y != self.last_y:
-    #         self.update_current_position(current_x, current_y)
-    #         self.insert_data(current_x, current_y, min_error, 1.0, 1.0)
-
-
-    #         self.rmse += min_error**2
-    #         rmse_value = sqrt(self.rmse / self.index)
-    #         print(f"RMSE after {self.index} poses: {rmse_value:.4f}")
-    #         self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
-    #         self.rmseLabel.adjustSize()
-
-    #     self.last_x = current_x
-    #     self.last_y = current_y
 
     def amcl_callback(self, msg: PoseWithCovarianceStamped):
         current_x = msg.pose.pose.position.x
@@ -304,32 +256,39 @@ class RobotUINode(Node, RobotUI):
 
 
 
-# def main(args=None):
-#     rclpy.init(args=args)
-
-#     app = QApplication([])
-
-#     node = RobotUINode()
-#     node.show()
-
-#     # 💡 Tạo một thread để chạy rclpy.spin() song song với Qt GUI
-#     ros_thread = Thread(target=rclpy.spin, args=(node,), daemon=True)
-#     ros_thread.start()
-
-#     # ✅ Đây là vòng lặp GUI (Qt sẽ chạy ở thread chính)
-#     sys.exit(app.exec_())
-
-
 def main(args=None):
+    """Initialize and run the Robot UI Node."""
     rclpy.init(args=args)
-    app = QApplication([])
+    app = QApplication(sys.argv)
     node = RobotUINode()
     node.show()
-    # Dùng QTimer để gọi spin_once định kỳ
+
+    # Use QTimer for ROS spin
     spin_timer = QTimer()
     spin_timer.timeout.connect(lambda: rclpy.spin_once(node, timeout_sec=0.0))
-    spin_timer.start(10)  # 10ms ~ 100Hz
-    sys.exit(app.exec_())
+    spin_timer.start(10)
+
+    try:
+        sys.exit(app.exec_())
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()
+
+
+# def main(args=None):
+#     rclpy.init(args=args)
+#     app = QApplication([])
+#     node = RobotUINode()
+#     node.show()
+#     # Dùng QTimer để gọi spin_once định kỳ
+#     spin_timer = QTimer()
+#     spin_timer.timeout.connect(lambda: rclpy.spin_once(node, timeout_sec=0.0))
+#     spin_timer.start(10)  # 10ms ~ 100Hz
+#     sys.exit(app.exec_())
+
+# if __name__ == "__main__":
+#     main()

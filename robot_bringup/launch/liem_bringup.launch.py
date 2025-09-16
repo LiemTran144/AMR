@@ -107,8 +107,8 @@ def generate_launch_description():
         launch_arguments={
             "cmd_vel_out": "/liem_controller/cmd_vel",     #  /nhatbot/cmd_vel_unstamped
             "config_topics": os.path.join(node_path, "config", "twist_mux_topics.yaml"),
-            # "config_locks": os.path.join(node_path, "config", "twist_mux_locks.yaml"),
-            # "config_joy":  os.path.join(nhatbot_stack_pkg, "config", "twist_mux_joy.yaml"),
+            "config_locks": os.path.join(node_path, "config", "twist_mux_locks.yaml"),
+            "config_joy":  os.path.join(node_path, "config", "twist_mux_joy.yaml"),
             # "use_sim_time":  LaunchConfiguration("use_sim_time")
         }.items()
     )
@@ -136,10 +136,10 @@ def generate_launch_description():
         joy_node,
         speed_control,
         differentialDrive,
-        # motion_control,
+        motion_control,
         odom, 
         lidar_launch,
-        # twist_mux_launch,
+        twist_mux_launch,
         twist_relay_node,
         joy_to_twist,
         provide_map,
