@@ -67,6 +67,9 @@
         "cinttypes": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
-    }
+        "variant": "cpp",
+        "csignal": "cpp",
+        "cfenv": "cpp"
+    },
+    "cmake.ignoreCMakeListsMissing": true
 }

@@ -1,0 +1,86 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50  # Hz - tần số vòng lặp controller_manager
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+      publish_rate: 50.0   # Hz - tần số publish joint_states
+
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController 
+
+    SensorBroadcaster:
+      type: nhatbot_interface/SensorBroadcaster
+      
+diff_drive_controller:
+  ros__parameters:
+    publish_rate: 50.0          # Hz - Odom publish frequency
+    velocity_rolling_window_size: 1
+    left_wheel_names: ["wheel_right_joint"] # wheel_left_joint
+    right_wheel_names: ["wheel_left_joint"] # wheel_right_joint
+
+    # state interface and command interface parameters
+    command_interfaces: ["velocity"]
+    state_interfaces: ["position", "velocity"]
+
+    # Actual physical parameters
+    wheel_separation: 0.45   # (m) Distance betweem two wheels
+    wheel_radius: 0.0535        # Wheel radius (m unit)
+
+    wheel_separation_multiplier: 1.0
+    left_wheel_radius_multiplier: 1.0
+    right_wheel_radius_multiplier: 1.0
+
+    # Odometry config
+    cmd_vel_timeout: 0.1
+    odom_frame_id: "odom"
+    base_frame_id: "base_link"
+    # Covariance matrix to represent the reliability of Pose/Twist in the message 
+    # 0.001 -> high reliability
+    # 0.01  -> Low reliability 
+
+    open_loop: false
+
+    # rule of thumb for Indoor robot, good encoder 
+    #                            x       y      z     roll  pitch   yaw
+    pose_covariance_diagonal : [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+    twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+
+    
+    enable_odom_tf: true      #  enable transform TF odom -> base_link
+
+    # Preserve turning radius when limiting speed/acceleration/jerk
+    preserve_turning_radius: true
+    publish_wheel_data: true
+
+    # limit the velocities
+    linear:
+      x:
+        has_velocity_limits: true
+        has_acceleration_limits: false
+        has_jerk_limits: false
+        max_velocity: 0.4       # m/s
+        min_velocity: -0.4      # m/s
+        max_acceleration: 0.2   # m/s^2  (0 -> 0.8 m/s -> need 1.6s)
+        max_jerk: 0.0
+        min_jerk: 0.0
+    angular:
+      z:
+        has_velocity_limits: true
+        has_acceleration_limits: false
+        has_jerk_limits: false
+        max_velocity: 1.0       # rad/s
+        min_velocity: -1.0      # rad/s
+        max_acceleration: 0.2   # rad/s^2
+        min_acceleration: -0.2
+        max_jerk: 0.0
+        min_jerk: 0.0
+        # invert: true
+
+
+    use_stamped_vel: true
+
+
+SensorBroadcaster:
+  ros__parameters:
+    publish_rate: 10.0  

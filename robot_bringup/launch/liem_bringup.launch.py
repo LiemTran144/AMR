@@ -12,8 +12,8 @@ from launch.actions import DeclareLaunchArgument
 def generate_launch_description():
     node_path = get_package_share_directory("robot_bringup")
     twist_mux_pkg = get_package_share_directory('twist_mux')
-    root_pkg_path = get_package_share_directory('robot_bringup')
-
+    firmware_pkg_path = get_package_share_directory('nhatbot_firmware')
+    ole_lidar_pkg_path = get_package_share_directory('ros2_lidar')
     # rviz_path = DeclareLaunchArgument("rviz", default_value=os.path.join(
     #     get_package_share_directory("robot_bringup"), 
     #     "rviz", 
@@ -79,26 +79,19 @@ def generate_launch_description():
         executable="odom.py",
     )
 
-    path_rviz = Node(
-        package="differential_drive",
-        executable="path_rviz.py",
-    )
-
     motion_control = Node(
         package="differential_drive",
         executable="motion_control.py",
     )
 
-    ui_Node = Node(
-        package="user_interface",
-        executable="ui_Node.py",
-    )
-
-    lidar_launch = IncludeLaunchDescription(
+    # lidar_a1_launch = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource(os.path.join(
+    #             node_path,'launch/lidar_a1.launch.py')))
+    
+    lidar_ole_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
-                node_path,'launch/lidar_a1.launch.py')))
-
-
+                node_path,'launch/lidar_ole.launch.py')))
+    
     twist_mux_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
@@ -129,21 +122,25 @@ def generate_launch_description():
         package="safety",
         executable="safety_stop.py",
     )
+
+    hw_interface_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(
+                firmware_pkg_path,'launch','bringup_hardware_interface.launch.py')))
     
     return LaunchDescription([
         rviz_path,
-        # rviz,
+        rviz,
         joy_node,
-        speed_control,
-        differentialDrive,
-        motion_control,
-        odom, 
-        lidar_launch,
+        # speed_control,
+        # differentialDrive,
+        # motion_control,
+        # odom, 
+        # lidar_a1_launch,
         twist_mux_launch,
         twist_relay_node,
         joy_to_twist,
         provide_map,
-        # path_rviz,
-        # ui_Node,
+        lidar_ole_launch,
         # safety_stop,
+        hw_interface_launch,
     ])
