@@ -3,12 +3,11 @@ import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid, Path
 from rclpy.qos import QoSProfile, DurabilityPolicy
-from geometry_msgs.msg import PointStamped, Pose, PoseStamped, Point
-import rclpy.time
+from geometry_msgs.msg import Pose, PoseStamped
 from tf2_ros import Buffer, TransformListener, LookupException
 from queue import PriorityQueue
 import math
-
+import time
 
 class GraphNode:
     def __init__(self, x, y, cost=0, heuristic=0, prev=None):
@@ -35,9 +34,9 @@ class AStarPlanner(Node):
         
         map_qos = QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL)  # Keep last map
         self.map_sub = self.create_subscription(OccupancyGrid, "/map", self.map_callback, map_qos)
-        self.pose_sub = self.create_subscription(PointStamped, "/goal_pose", self.goal_callback, 10)
-        self.path_pub = self.create_publisher(Path, "/a_star/path", 10)
-        self.map_pub = self.create_publisher(OccupancyGrid, "/a_star/visited_map", 10)
+        self.pose_sub = self.create_subscription(PoseStamped, "/goal_pose", self.goal_callback, 10)
+        self.path_pub = self.create_publisher(Path, "/a_star_path_py", 10)
+        self.map_pub = self.create_publisher(OccupancyGrid, "/a_star/visited_map_py", 10)
 
         self.map_ = None 
         self.visited_map = OccupancyGrid()
@@ -51,8 +50,8 @@ class AStarPlanner(Node):
         self.visited_map.info = map_msg.info
         self.visited_map.data = [-1] * (map_msg.info.height * map_msg.info.width)
 
-    def goal_callback(self, pose: PointStamped):
-        self.get_logger().info(f"Goal pose received at ({pose.point.x}, {pose.point.y})")
+    def goal_callback(self, pose_msg: PoseStamped):
+        self.get_logger().info(f"Goal pose received at ({pose_msg.pose.position.x}, {pose_msg.pose.position.y})")
         if self.map_ is None:
             self.get_logger().error("No map received!")
             return
@@ -66,31 +65,31 @@ class AStarPlanner(Node):
                 rclpy.time.Time()
             )
         except LookupException:
-            self.get_logger().error("Could not transform map to base_footprint")
+            self.get_logger().error("Could not transform map to base_link")
             return 
         
+        # Start pose
         start_pose = Pose()
         start_pose.position.x = map_to_base_tf.transform.translation.x
         start_pose.position.y = map_to_base_tf.transform.translation.y
         start_pose.orientation = map_to_base_tf.transform.rotation
 
-        goal_pose = Pose()
-        goal_pose.position.x = pose.point.x
-        goal_pose.position.y = pose.point.y
-        goal_pose.position.z = pose.point.z
+        # Goal pose
+        goal_pose = pose_msg.pose
 
+        time_start = time.time_ns()
         path = self.plan(start_pose, goal_pose)
+        time_end = time.time_ns()
 
         if path.poses: 
             self.get_logger().info(f"Shortest path found with {len(path.poses)} poses")
+            self.get_logger().info(f"Planning time: {time_end - time_start} ns")
             self.path_pub.publish(path)
         else:
             self.get_logger().warn("No path found to the goal.")
 
     def plan(self, start: Pose, goal: Pose):
         explore_directions = [(-1, 0), (1, 0), (0, 1), (0, -1)] # 4-connected
-        # explore_directions = [(-1, 0), (1, 0), (0, 1), (0, -1), 
-        #                       (-1, -1), (-1, 1), (1, -1), (1, 1)]  # 8-connected
         pending_nodes = PriorityQueue()  
         visited_nodes = set()          
         
@@ -102,7 +101,6 @@ class AStarPlanner(Node):
             return Path()
             
         start_node.heuristic = self.manhattan_distance(start_node, goal_node)
-        # start_node.heuristic = self.euclidean_distance(start_node, goal_node)
         pending_nodes.put(start_node)
         
         path_found = False
@@ -119,7 +117,7 @@ class AStarPlanner(Node):
             self.visited_map.data[self.pose_to_cell(active_node)] = 100
 
             for dir_x, dir_y in explore_directions:
-                new_node = GraphNode(active_node.x + dir_x, active_node.y + dir_y)  #new_node : GraphNode = active_node + (dir_x, dir_y)
+                new_node = GraphNode(active_node.x + dir_x, active_node.y + dir_y)
                 
                 if (new_node.x, new_node.y) in visited_nodes:
                     continue
@@ -131,19 +129,15 @@ class AStarPlanner(Node):
                 if cell_index >= len(self.map_.data):
                     continue
                     
-                # Kiểm tra ô có thể đi được (0 = free, -1 = unknown, >0 = occupied)
                 if self.map_.data[cell_index] > 0:  # Occupied
                     continue
 
                 new_node.cost = active_node.cost + 1
                 new_node.heuristic = self.manhattan_distance(new_node, goal_node)
-                # new_node.heuristic = self.euclidean_distance(new_node, goal_node)
                 new_node.prev = active_node
                 pending_nodes.put(new_node)
 
-            # Publish visited map occasionally
-            if pending_nodes.qsize() % 50 == 0:  
-                
+            if pending_nodes.qsize() % 50 == 0:
                 self.map_pub.publish(self.visited_map)
 
         path = Path()
@@ -151,7 +145,6 @@ class AStarPlanner(Node):
         path.header.stamp = self.get_clock().now().to_msg()
 
         if path_found and active_node:
-            # Reconstruct path
             path_points = []
             current_node = active_node
             
@@ -167,7 +160,6 @@ class AStarPlanner(Node):
             path.poses = path_points
             self.get_logger().info(f"Path reconstructed with {len(path.poses)} points")
 
-        # Publish final visited map
         self.map_pub.publish(self.visited_map)
         return path
 
@@ -176,7 +168,7 @@ class AStarPlanner(Node):
         pose.position.x = node.x * self.map_.info.resolution + self.map_.info.origin.position.x
         pose.position.y = node.y * self.map_.info.resolution + self.map_.info.origin.position.y
         pose.position.z = 0.0
-        pose.orientation.w = 1.0  # Default orientation
+        pose.orientation.w = 1.0
         return pose
 
     def world_to_grid(self, pose: Pose) -> GraphNode: 
@@ -185,8 +177,7 @@ class AStarPlanner(Node):
         return GraphNode(grid_x, grid_y)
 
     def pose_on_map(self, node: GraphNode):
-        return (0 <= node.x < self.map_.info.width and 
-                0 <= node.y < self.map_.info.height)
+        return (0 <= node.x < self.map_.info.width and 0 <= node.y < self.map_.info.height)
 
     def pose_to_cell(self, node: GraphNode):
         return int(node.y * self.map_.info.width + node.x)
@@ -208,6 +199,7 @@ def main():
     finally:
         node.destroy_node()
         rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()

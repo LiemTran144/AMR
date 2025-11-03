@@ -13,19 +13,23 @@ def generate_launch_description():
     node_path = get_package_share_directory("robot_bringup")
     twist_mux_pkg = get_package_share_directory('twist_mux')
     firmware_pkg_path = get_package_share_directory('nhatbot_firmware')
-    ole_lidar_pkg_path = get_package_share_directory('ros2_lidar')
     # rviz_path = DeclareLaunchArgument("rviz", default_value=os.path.join(
     #     get_package_share_directory("robot_bringup"), 
     #     "rviz", 
     #     "display_rviz.rviz"))
 
-    rviz_path = DeclareLaunchArgument(
+    rviz_arg = DeclareLaunchArgument(
         "rviz",
         default_value=os.path.join(node_path, "rviz", "display_rviz.rviz"),
         description="Path to RViz config file"
     )
-
-
+   
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz',
+        arguments=['-d', os.path.join(get_package_share_directory(
+            'robot_bringup'), 'rviz', 'test.rviz')])
 
     joy_node = Node(
         package="joy",
@@ -79,9 +83,9 @@ def generate_launch_description():
         executable="odom.py",
     )
 
-    motion_control = Node(
+    pd_control = Node(
         package="differential_drive",
-        executable="motion_control.py",
+        executable="pd_control.py",
     )
 
     # lidar_a1_launch = IncludeLaunchDescription(
@@ -98,21 +102,13 @@ def generate_launch_description():
                 twist_mux_pkg,"launch", "twist_mux_launch.py")
         ),
         launch_arguments={
-            "cmd_vel_out": "/liem_controller/cmd_vel",     #  /nhatbot/cmd_vel_unstamped
+            "cmd_vel_out": "/liem/cmd_vel_unstamped",     #  /nhatbot/cmd_vel_unstamped  /nhatbot/cmd_vel
             "config_topics": os.path.join(node_path, "config", "twist_mux_topics.yaml"),
             "config_locks": os.path.join(node_path, "config", "twist_mux_locks.yaml"),
             "config_joy":  os.path.join(node_path, "config", "twist_mux_joy.yaml"),
             # "use_sim_time":  LaunchConfiguration("use_sim_time")
         }.items()
     )
-    
-    rviz = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz',
-        arguments=['-d', os.path.join(get_package_share_directory(
-            'robot_bringup'), 'rviz', 'display_rviz.rviz')])
-
 
     provide_map = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
@@ -127,13 +123,20 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(
                 firmware_pkg_path,'launch','bringup_hardware_interface.launch.py')))
     
+    initial_pose_publisher = Node(
+        package="differential_drive",
+        executable="initial_pose.py",
+        name="initial_pose_publisher",
+        output="screen",
+    )
+    
     return LaunchDescription([
-        rviz_path,
-        rviz,
+        rviz_arg,
+        rviz_node,
         joy_node,
         # speed_control,
         # differentialDrive,
-        # motion_control,
+        # pd_control,
         # odom, 
         # lidar_a1_launch,
         twist_mux_launch,
@@ -143,4 +146,5 @@ def generate_launch_description():
         lidar_ole_launch,
         # safety_stop,
         hw_interface_launch,
+        # initial_pose_publisher,
     ])

@@ -8,15 +8,15 @@ public:
     TwistRelay() : Node("twist_relay")
     {
         // Twist_mux and Controller
-        controller_sub_ = create_subscription<geometry_msgs::msg::Twist>("/nhatbot/cmd_vel_unstamped",
+        controller_sub_ = create_subscription<geometry_msgs::msg::Twist>("/liem/cmd_vel_unstamped",
                                                                          10, std::bind(&TwistRelay::controller_twist_callback, this, std::placeholders::_1));
-        controller_pub_ = create_publisher<geometry_msgs::msg::TwistStamped>("/nhatbot/cmd_vel", 10);
+        controller_pub_ = create_publisher<geometry_msgs::msg::TwistStamped>("/liem/cmd_vel", 10);
 
         // Joystick and Twist_mux
 
         joy_sub_ = create_subscription<geometry_msgs::msg::TwistStamped>("/input_joy/cmd_vel_stamped",
                                                                          10, std::bind(&TwistRelay::joy_twist_callback, this, std::placeholders::_1));
-        joy_pub_ = create_publisher<geometry_msgs::msg::Twist>("/liem_controller/cmd_vel", 10);  // /liem_controller/cmd_vel    /input_joy/cmd_vel
+        joy_pub_ = create_publisher<geometry_msgs::msg::Twist>("/input_joy/cmd_vel", 10);  // /liem_controller/cmd_vel    /input_joy/cmd_vel
     }
 
 private:

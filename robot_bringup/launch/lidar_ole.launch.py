@@ -85,12 +85,7 @@ def generate_launch_description():
             package="laser_filters",
             executable="scan_to_scan_filter_chain",
             parameters=[os.path.join(get_package_share_directory("robot_bringup"), "config", "angular_filter.yaml")],
-            
-            # parameters=[
-            #     PathJoinSubstitution([
-            #         get_package_share_directory("laser_filters"),
-            #         "examples", "angular_filter.yaml",
-            #     ])], ,         
+               
         ),
 
         Node(

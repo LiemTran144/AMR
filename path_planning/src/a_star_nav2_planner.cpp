@@ -98,7 +98,7 @@ namespace nhatbot_planning
 bool AStarPlanner::poseOnMap(const GraphNode & node)
 {
     return node.x < static_cast<int>(costmap_->getSizeInCellsX()) && node.x >= 0 &&
-        node.y < static_cast<int>(costmap_->getSizeInCellsY()) && node.y >= 0;
+           node.y < static_cast<int>(costmap_->getSizeInCellsY()) && node.y >= 0;
 }
 
 GraphNode AStarPlanner::worldToGrid(const geometry_msgs::msg::Pose & pose)
@@ -118,7 +118,7 @@ geometry_msgs::msg::Pose AStarPlanner::gridToWorld(const GraphNode & node)
 
 unsigned int AStarPlanner::poseToCell(const GraphNode & node)
 {
-    return costmap_->getSizeInCellsX() * node.y + node.x;
+    return costmap_->getSizeInCellsX() * node.y + node.x; 
 }
 
 double AStarPlanner::manhattanDistance(const GraphNode & node, const GraphNode &goal_node)

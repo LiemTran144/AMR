@@ -16,7 +16,7 @@ class ClickedWaypointNode(Node):
         csv_time = time.strftime("%Y%m%d-%H%M%S")
         self.declare_parameter('csv_path', '/home/liemtran/liem_ws/src/user_interface/data')
         self.declare_parameter('csv_file', 'waypoints_' + csv_time + '.csv')
-        self.declare_parameter('interpolation_precision', 10)
+        self.declare_parameter('interpolation_precision', 100)
         self.declare_parameter('clicked_point_topic', '/clicked_point')
 
         csv_path = self.get_parameter('csv_path').get_parameter_value().string_value

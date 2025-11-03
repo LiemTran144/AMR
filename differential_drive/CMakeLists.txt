@@ -19,6 +19,7 @@ install(
   ${PROJECT_NAME}/pd_control.py
   ${PROJECT_NAME}/pure_pursuit.py
   ${PROJECT_NAME}/fake_amcl.py
+  ${PROJECT_NAME}/initial_pose.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

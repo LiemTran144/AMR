@@ -19,14 +19,14 @@ class FakeAMCLPublisher(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         # Load waypoints from CSV
-        path = '/home/liemtran/liem_ws/src/user_interface/data/waypoint0509.csv'
+        path = '/home/liemtran/liem_ws/src/user_interface/data/waypoints_20251102-175616.csv'
         self.df = pd.read_csv(path)
 
         # Tạo thêm điểm nội suy để có nhiều điểm hơn
-        self.interpolated_path = self.interpolate_path(self.df, step=0.02)  # 0.02m mỗi bước
+        self.interpolated_path = self.interpolate_path(self.df, step=0.2)  # 0.02m mỗi bước
         self.index = 0
 
-    def interpolate_path(self, df, step=0.01):
+    def interpolate_path(self, df, step=0.2):
         # Tạo danh sách điểm nội suy mượt hơn
         new_points = []
         for i in range(len(df) - 1):
@@ -40,9 +40,9 @@ class FakeAMCLPublisher(Node):
                 y = y0 + t * (y1 - y0)
                 heading = h0 + t * (h1 - h0)
                 # thêm nhiễu nhỏ
-                noise_x = np.random.normal(0, 0.05)
-                noise_y = np.random.normal(0, 0.05)
-                noise_heading = np.random.normal(0, 0.01)
+                noise_x = np.random.normal(0, 0.3)
+                noise_y = np.random.normal(0, 0.3)
+                noise_heading = np.random.normal(0, 0.1)
                 new_points.append((x + noise_x, y + noise_y, heading + noise_heading))
         return new_points
 
@@ -73,7 +73,7 @@ class FakeAMCLPublisher(Node):
         msg.pose.covariance[35] = 0.05  # yaw
 
         self.publisher_.publish(msg)
-        self.get_logger().info(f'Published fake AMCL pose: x={x:.2f}, y={y:.2f}, theta={theta:.2f}')
+        # self.get_logger().info(f'Published fake AMCL pose: x={x:.2f}, y={y:.2f}, theta={theta:.2f}')
 
 def main(args=None):
     rclpy.init(args=args)

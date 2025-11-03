@@ -11,14 +11,28 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     use_sim_time = LaunchConfiguration("use_sim_time")
-    lifecycle_nodes = [ "planner_server", "smoother_server"]
+    lifecycle_nodes = [ "planner_server", "smoother_server" ]
     nhatbot_navigation_pkg = get_package_share_directory("path_planning")
 
     use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
-        default_value="false")
+        default_value="false",)
 
     
+    a_star_planner_costmap_node = Node(
+        package='path_planning',
+        executable='a_star_planner_costmap',
+        name='a_star_planner',
+        output='screen',
+    )
+
+    compute_path_client_node = Node(
+        package='path_planning',
+        executable='compute_path_client',
+        name='compute_path_client',
+        output='screen',
+    )
+
     nav2_planner_server = Node(
         package="nav2_planner",
         executable="planner_server",
@@ -60,8 +74,10 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        a_star_planner_costmap_node,
+        compute_path_client_node,
         use_sim_time_arg,
         nav2_planner_server,
-        nav2_lifecycle_manager,
         nav2_smoother_server,
+        nav2_lifecycle_manager,
     ])

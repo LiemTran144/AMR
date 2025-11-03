@@ -3,6 +3,7 @@
 #include "rmw/qos_profiles.h"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include <vector>
+#include <chrono>
 
 namespace nhatbot_planning
 {
@@ -28,16 +29,58 @@ AStarPlanner::AStarPlanner() : Node("a_star_node")
 
 void AStarPlanner::mapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr map)
 {
-    RCLCPP_INFO(this->get_logger(), "Map received");
+    // RCLCPP_INFO(this->get_logger(), "Map received");
     map_ = map;
     visited_map_.header.frame_id = map->header.frame_id;
     visited_map_.info = map->info;
     visited_map_.data = std::vector<int8_t>(visited_map_.info.height * visited_map_.info.width, -1);
 }
 
+// void AStarPlanner::goalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr pose)
+// {
+//     RCLCPP_INFO(this->get_logger(), "Goal pose received at (%.2f, %.2f)", pose->pose.position.x, pose->pose.position.y);
+//     RCLCPP_INFO(this->get_logger(), "Frame id: %s", pose->header.frame_id.c_str());
+//     if(!map_)
+//     {
+//         RCLCPP_ERROR(get_logger(), "No map received!");
+//         return;
+//     }
+
+//     visited_map_.data = std::vector<int8_t>(visited_map_.info.height * visited_map_.info.width, -1);
+
+//     geometry_msgs::msg::TransformStamped map_to_base_tf;
+//     try 
+//     {
+//         map_to_base_tf = tf_buffer_->lookupTransform(map_->header.frame_id, "base_link", tf2::TimePointZero);
+//     } 
+//     catch (const tf2::TransformException & ex) 
+//     {
+//         RCLCPP_ERROR(get_logger(), "Could not transform from map to base_link");
+//         return;
+//     }
+
+//     geometry_msgs::msg::Pose map_to_base_pose;
+//     map_to_base_pose.position.x = map_to_base_tf.transform.translation.x;
+//     map_to_base_pose.position.y = map_to_base_tf.transform.translation.y;
+//     map_to_base_pose.orientation = map_to_base_tf.transform.rotation;
+
+//     auto path = plan(map_to_base_pose, pose->pose);
+
+//     if (!path.poses.empty()) 
+//     {
+//         RCLCPP_INFO(this->get_logger(), "Shortest path found!");
+//         path_pub_->publish(path);
+//     } 
+//     else 
+//     {
+//         RCLCPP_WARN(this->get_logger(), "No path found to the goal.");
+//     }
+// }
+
+
+
 void AStarPlanner::goalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr pose)
 {
-    RCLCPP_INFO(this->get_logger(), "Goal pose received at (%.2f, %.2f)", pose->pose.position.x, pose->pose.position.y);
     if(!map_)
     {
         RCLCPP_ERROR(get_logger(), "No map received!");
@@ -62,11 +105,25 @@ void AStarPlanner::goalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr
     map_to_base_pose.position.y = map_to_base_tf.transform.translation.y;
     map_to_base_pose.orientation = map_to_base_tf.transform.rotation;
 
+    // --- BẮT ĐẦU ĐO THỜI GIAN ---
+    auto start_time = std::chrono::steady_clock::now();
+
     auto path = plan(map_to_base_pose, pose->pose);
+
+    // --- KẾT THÚC ĐO THỜI GIAN ---
+    auto end_time = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+    
+    // --- IN KẾT QUẢ THỜI GIAN ---
+    // RCLCPP_INFO(this->get_logger(), "Planning finished in %ld milliseconds.", duration.count());
+    RCLCPP_INFO(this->get_logger(), "Planning finished in %ld nanoseconds.", duration.count());
+    
+
 
     if (!path.poses.empty()) 
     {
-        RCLCPP_INFO(this->get_logger(), "Shortest path found!");
+        // --- IN SỐ LƯỢNG NODE (ĐIỂM) TRONG ĐƯỜNG ĐI ---
+        RCLCPP_INFO(this->get_logger(), "Shortest path found! Path consists of %zu nodes.", path.poses.size()); // %zu for size_t
         path_pub_->publish(path);
     } 
     else 
@@ -80,6 +137,11 @@ nav_msgs::msg::Path AStarPlanner::plan(const geometry_msgs::msg::Pose & start, c
     std::vector<std::pair<int, int>> explore_directions = {
         {-1, 0}, {1, 0}, {0, -1}, {0, 1}
     };
+
+    // std::vector<std::pair<int, int>> explore_directions = {
+    //     {1, 0}, {0, 1}, {-1, 0}, {0, -1}
+    // };
+
 
     std::priority_queue<GraphNode, std::vector<GraphNode>, std::greater<GraphNode>> pending_nodes;
     std::vector<GraphNode> visited_nodes;

@@ -12,13 +12,6 @@ def generate_launch_description():
     # config_file_path = os.path.join(pkg_share_dir, 'config', 'costmap.yaml')
 
     # # Khai báo node costmap
-    # costmap_node = Node(
-    #     package='nav2_costmap_2d',
-    #     executable='costmap_2d_node',  # Đây là node độc lập (không phải lifecycle)
-    #     name='costmap',                # Tên này PHẢI khớp với tên trong file YAML
-    #     output='screen',
-    #     parameters=[config_file_path]  # Tải file cấu hình
-    # )
     a_star_planner_node = Node(
         package='path_planning',
         executable='a_star_planner_costmap',
@@ -29,3 +22,5 @@ def generate_launch_description():
         # costmap_node,
         a_star_planner_node,
     ])
+
+

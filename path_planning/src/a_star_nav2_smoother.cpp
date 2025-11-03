@@ -62,17 +62,20 @@ namespace nhatbot_planning
     pending_nodes.push(start_node);
 
     GraphNode active_node;
-    while (!pending_nodes.empty() && rclcpp::ok()) {
+    while (!pending_nodes.empty() && rclcpp::ok()) 
+    {
         active_node = pending_nodes.top();
         pending_nodes.pop();
 
         // Goal found!
-        if(worldToGrid(goal.pose) == active_node){
+        if(worldToGrid(goal.pose) == active_node)
+        {
             break;
         }
 
         // Explore neighbors
-        for (const auto & dir : explore_directions) {
+        for (const auto & dir : explore_directions) 
+        {
             GraphNode new_node = active_node + dir;
             // Check if the new position is within bounds and not an obstacle
             if (std::find(visited_nodes.begin(), visited_nodes.end(), new_node) == visited_nodes.end() &&
@@ -162,6 +165,7 @@ double AStarPlanner_Smoother::manhattanDistance(const GraphNode & node, const Gr
 {
     return abs(node.x - goal_node.x) + abs(node.y - goal_node.y);
 }
+
 }  
 
 

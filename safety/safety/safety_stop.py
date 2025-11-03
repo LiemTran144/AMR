@@ -95,7 +95,7 @@ class SafetyStop(Node):
                 is_safety_stop.data = False
                 self.zones.markers[0].color.a = 1.0
                 self.zones.markers[1].color.a = 0.5
-                self.decrease_speed_client.send_goal_async(JoyTurbo.Goal())
+                # self.decrease_speed_client.send_goal_async(JoyTurbo.Goal())
             elif self.state == State.DANGER:
                 is_safety_stop = True
                 self.zones.markers[0].color.a = 1.0
@@ -106,7 +106,7 @@ class SafetyStop(Node):
                 self.zones.markers[1].color.a = 0.5
 
                 is_safety_stop.data = False
-                self.increase_speed_client.send_goal_async(JoyTurbo.Goal())
+                # self.increase_speed_client.send_goal_async(JoyTurbo.Goal())
             
             self.prev_state = self.state
             self.safety_stop_pub.publish(is_safety_stop)

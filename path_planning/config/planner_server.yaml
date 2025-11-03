@@ -3,7 +3,7 @@ planner_server:
     expected_planner_frequency: 1.0
     use_sim_time: false
     # planner_plugins: ["GridBased", GridBasedFast]
-    planner_plugins: ['GridBasedFast']
+    planner_plugins: ['GridBased']
 
     # # Dijkstra Planner parameters
     # GridBased:
@@ -11,9 +11,9 @@ planner_server:
     #   plugin: "nhatbot_planning::DijkstraPlanner_Smoother"
 
     # A* Planner parameters
-    GridBasedFast:
-      # plugin: "nhatbot_planning::AStarPlanner"
+    GridBased:
       plugin: "nhatbot_planning::AStarPlanner_Smoother"
+      # plugin: "nhatbot_planning::AStarPlanner_Smoother"
 
     # Smac 2D parameters
     # GridBased_nav2:
@@ -58,7 +58,7 @@ global_costmap:
         enabled: True
         observation_sources: scan # observation source is the scan
         scan: # Specific configuration
-          topic: /scan_filtered
+          topic: /scan   #/scan_filtered
           data_type: "LaserScan"
           max_obstacle_height: 2.0
           clearing: True

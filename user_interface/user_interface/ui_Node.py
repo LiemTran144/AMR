@@ -4,22 +4,18 @@ from rclpy.node import Node
 from robot_ui import RobotUI
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-from PyQt5.QtWidgets import QApplication, QFileDialog
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 from PyQt5.QtCore import QTimer
 import sys
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 import csv
-from tf2_ros import Buffer, TransformListener, TransformException
+from tf2_ros import Buffer, TransformListener
 from std_msgs.msg import Bool
-from threading import Thread
-from geometry_msgs.msg import PoseStamped
-from tf_transformations import quaternion_matrix, quaternion_from_matrix, translation_from_matrix, concatenate_matrices
-
-import random
 from math import sqrt
-# from rclpy.callback_groups import ReentrantCallbackGroup
-
+from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
+import numpy as np  # For vectorized distance calc
 
 class RobotUINode(Node, RobotUI):
     def __init__(self):
@@ -30,21 +26,25 @@ class RobotUINode(Node, RobotUI):
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
-        # self.group_Reent_ = ReentrantCallbackGroup()
+        self.group_Reent_ = ReentrantCallbackGroup()
 
-        self.cmd_pub = self.create_publisher(Twist,'/UI/cmd_vel', 10)  #  /liem_controller/cmd_vel
-        self.nav_pub = self.create_publisher(Path, '/liem/ui_path', 10)
+        self.cmd_pub = self.create_publisher(Twist, '/UI/cmd_vel', 10)
+        self.path_pub = self.create_publisher(Path, '/liem/ui_path', 10)
 
-        self.odom_sub = self.create_subscription(Odometry,'/liem_controller/odom',self.odom_callback, 10) #, callback_group=self.group_Reent_
-        self.fault_sub_ = self.create_subscription(Bool, '/liem_controller/fault', self.fault_callback, 10) #, callback_group=self.group_Reent_
-        self.amcl_sub_ = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.amcl_callback, 10) #, callback_group=self.group_Reent_
+        self.odom_sub = self.create_subscription(Odometry, '/liem_controller/odom', self.odom_callback, 10, callback_group=self.group_Reent_)
+        self.fault_sub_ = self.create_subscription(Bool, '/liem_controller/fault', self.fault_callback, 10, callback_group=self.group_Reent_)
+        self.amcl_sub_ = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.amcl_callback, 10, callback_group=self.group_Reent_)
+
         self.cmd_timer = QTimer(self)
-        self.cmd_timer.setInterval(100)  # 100 ms ~ 10 Hz
+        self.cmd_timer.setInterval(100)  # 100ms ~ 10 Hz
         self.cmd_timer.timeout.connect(self._publish_current_cmd)
 
         self.current_linear = 0.0
         self.current_angular = 0.0
+        self.linear_vel = 0.0  # Latest from odom
+        self.angular_vel = 0.0  # Latest from odom
 
+        # Button connections
         self.forwardButton.pressed.connect(self._start_publishing_forward)
         self.backwardButton.pressed.connect(self._start_publishing_backward)
         self.leftButton.pressed.connect(self._start_publishing_left)
@@ -55,23 +55,24 @@ class RobotUINode(Node, RobotUI):
         self.rightButton.released.connect(self._stop_publishing)
         self.stopButton.pressed.connect(self._stop_publishing)
 
-        self.path_timer = QTimer(self)
-        self.path_timer.setInterval(500)   # 500 ms ~ 2 Hz
-        self.path_timer.timeout.connect(self._publish_path)
-
-        self.sendGoalButton.clicked.connect(self._start_sending_path_loop)
-        self.loadCSVButton.clicked.connect(self.publish_path_from_csv)
+        self.sendGoalButton.clicked.connect(self.publish_path)
+        self.loadCSVButton.clicked.connect(self.load_path)
         self.pauseButton.clicked.connect(self.toggle_pause_path)
         self.path_msg = None
         self.last_x = None
         self.last_y = None
         self.is_paused = False
-        #database
+
+        # For RMSE
         self.index = 0
-        self.rmse = 0.0
+        self.rmse_sum = 0.0  # Sum of squared errors
+
+        # Waypoints as numpy for optimization
+        self.waypoints_np = None
+
     def toggle_pause_path(self):
+        """Pause or resume path publishing."""
         if self.is_paused:
-            # Nếu đang tạm dừng, tiếp tục gửi đường đi
             if self.path_msg and self.path_msg.poses:
                 if not self.path_timer.isActive():
                     self.path_timer.start()
@@ -79,9 +80,9 @@ class RobotUINode(Node, RobotUI):
                     self.pauseButton.setText("Pause")
             else:
                 self.get_logger().warn("No path available. Please load CSV first.")
+                QMessageBox.warning(self, "Path Error", "No path loaded.")
             self.is_paused = False
         else:
-            # Nếu đang gửi đường đi, tạm dừng
             if self.path_timer.isActive():
                 self.path_timer.stop()
                 self.get_logger().info("Paused sending path.")
@@ -89,11 +90,11 @@ class RobotUINode(Node, RobotUI):
             self.is_paused = True
 
     def _publish_current_cmd(self):
+        """Publish current Twist command."""
         twist = Twist()
         twist.linear.x = self.current_linear
         twist.angular.z = self.current_angular
         self.cmd_pub.publish(twist)
-        # self.get_logger().info(f"[TIMER] cmd_vel: linear={self.current_linear}, angular={self.current_angular}")
 
     def _start_publishing_forward(self):
         self.current_linear = 0.1
@@ -122,23 +123,17 @@ class RobotUINode(Node, RobotUI):
     def _stop_publishing(self):
         if self.cmd_timer.isActive():
             self.cmd_timer.stop()
-
-        # Gửi lệnh stop một lần
         twist = Twist()
         twist.linear.x = 0.0
         twist.angular.z = 0.0
         self.cmd_pub.publish(twist)
         self.get_logger().info("Published STOP cmd_vel")
-
         self.current_linear = 0.0
         self.current_angular = 0.0
 
-    def publish_path_from_csv(self):
-        file_path, _ = QFileDialog.getOpenFileName(self,
-                                                   "Open CSV File",
-                                                   "",
-                                                   "CSV Files (*.csv)")
-                                                   
+    def load_path(self):
+        """Load path from CSV and prepare for publishing."""
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)")
         self.pathLabel.setText(file_path)
         self.pathLabel.adjustSize()
 
@@ -146,12 +141,15 @@ class RobotUINode(Node, RobotUI):
         path.header.frame_id = "map"
         path.header.stamp = self.get_clock().now().to_msg()
         poses = []
+        waypoints = []
 
         if file_path:
-            self.plot_setpoint(file_path)
             try:
+                self.plot_setpoint(file_path)
                 with open(file_path, 'r') as csvfile:
                     reader = csv.DictReader(csvfile)
+                    if 'x' not in reader.fieldnames or 'y' not in reader.fieldnames:
+                        raise ValueError("CSV must have 'x' and 'y' columns.")
                     for row in reader:
                         pose = PoseStamped()
                         pose.header.frame_id = "map"
@@ -159,114 +157,101 @@ class RobotUINode(Node, RobotUI):
                         pose.pose.position.x = float(row['x'])
                         pose.pose.position.y = float(row['y'])
                         pose.pose.position.z = 0.0
-                        pose.pose.orientation.w = 1.0
+                        pose.pose.orientation.w = 1.0  # Default; add 'qx,qy,qz,qw' if in CSV
                         poses.append(pose)
+                        waypoints.append([pose.pose.position.x, pose.pose.position.y])
 
-                    path.poses = poses    
-                    self.path_msg = path
-
-                    self.get_logger().info(f"Loaded CSV: {file_path} ({len(path.poses)} poses)")
-
+                path.poses = poses
+                self.path_msg = path
+                self.waypoints_np = np.array(waypoints) if waypoints else None
+                self.get_logger().info(f"Loaded CSV: {file_path} ({len(path.poses)} poses)")
+                # Reset RMSE on new path
+                self.index = 0
+                self.rmse_sum = 0.0
+                # self.rmseLabel.setText("RMSE: 0.0000")
             except Exception as e:
                 self.get_logger().error(f"Failed to read CSV file: {e}")
+                QMessageBox.warning(self, "CSV Error", str(e))
                 self.path_msg = None
+                self.waypoints_np = None
         else:
             self.get_logger().warn("No file selected for CSV.")
             self.path_msg = None
+            self.waypoints_np = None
 
-    def _start_sending_path_loop(self):
-        self.index = 0
-        self.rmse = 0.0
+    def publish_path(self):
+        """Start continuous path sending."""
         if self.path_msg and self.path_msg.poses:
-            if not self.path_timer.isActive():
-                self.path_timer.start()
-                self.get_logger().info("Started sending path continuously.")
+            self.path_msg.header.stamp = self.get_clock().now().to_msg()
+            self.path_pub.publish(self.path_msg)
         else:
             self.get_logger().warn("No path available. Please load CSV first.")
-
-    def _publish_path(self):
-
-        if self.path_msg:
-            self.path_msg.header.stamp = self.get_clock().now().to_msg()
-            self.nav_pub.publish(self.path_msg)
-        else:
-
-            if self.path_timer.isActive():
-                self.path_timer.stop()
-                self.get_logger().error("Path_msg is None, stopping path_timer.")
+            QMessageBox.warning(self, "Path Error", "No path loaded.")
 
     def odom_callback(self, msg: Odometry):
-
-        self.linear_vel = msg.twist.twist.linear.x
-        self.angular_vel = msg.twist.twist.angular.z
-        self.update_Velocity(self.linear_vel, self.angular_vel)
-        
-        if abs(self.linear_vel) <= 0.01 and abs(self.angular_vel) <= 0.01:
-            self.light_color_stop()
-        else:
-            self.light_color_run()
-
+        """Update velocities and UI lights."""
+        try:
+            self.linear_vel = msg.twist.twist.linear.x
+            self.angular_vel = msg.twist.twist.angular.z
+            self.update_Velocity(self.linear_vel, self.angular_vel)
+            if abs(self.linear_vel) <= 0.01 and abs(self.angular_vel) <= 0.01:
+                self.light_color_stop()
+            else:
+                self.light_color_run()
+        except Exception as e:
+            self.get_logger().error(f"Odom callback error: {e}")
 
     def amcl_callback(self, msg: PoseWithCovarianceStamped):
-        current_x = msg.pose.pose.position.x
-        current_y = msg.pose.pose.position.y
-        self.index += 1
+        """Process AMCL pose: update position, error, DB."""
+        try:
+            current_x = msg.pose.pose.position.x
+            current_y = msg.pose.pose.position.y
+            self.index += 1
 
-        if self.path_msg and self.path_msg.poses:
-            # Tìm waypoint gần nhất
             min_error = float('inf')
-            closest_waypoint = None
+            # closest_waypoint_x, closest_waypoint_y = None, None
 
-            for pose in self.path_msg.poses:
-                waypoint_x = pose.pose.position.x
-                waypoint_y = pose.pose.position.y
+            if self.waypoints_np is not None and len(self.waypoints_np) > 0:
+                # Vectorized distance calculation for efficiency
+                distances = np.sqrt(np.sum((self.waypoints_np - np.array([current_x, current_y]))**2, axis=1))
+                min_idx = np.argmin(distances)
+                min_error = distances[min_idx]
+                # closest_waypoint_x, closest_waypoint_y = self.waypoints_np[min_idx]
 
-                # Tính khoảng cách Euclidean
-                error = sqrt((current_x - waypoint_x)**2 + (current_y - waypoint_y)**2)
+                # self.update_error(current_x, closest_waypoint_x, current_y, closest_waypoint_y)
 
-                if error < min_error:
-                    min_error = error
-                    closest_waypoint = pose
+            if current_x != self.last_x or current_y != self.last_y:
+                self.update_current_position(current_x, current_y)
+                # Use latest velocities from odom
+                self.insert_data(current_x, current_y, min_error, self.linear_vel, self.angular_vel)
+                self.update_error_plot(min_error)
+                # self.rmse_sum += min_error ** 2
+                # rmse_value = sqrt(self.rmse_sum / self.index) if self.index > 0 else 0.0
+                # self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
+                # self.rmseLabel.adjustSize()
 
-
-            if closest_waypoint:
-                waypoint_x = closest_waypoint.pose.position.x
-                waypoint_y = closest_waypoint.pose.position.y
-
-                # Vẽ đường nối giữa current position và closest waypoint
-                self.update_error(current_x, waypoint_x, current_y, waypoint_y)
-
-        # Cập nhật vị trí hiện tại nếu có thay đổi
-        if current_x != self.last_x or current_y != self.last_y:
-            self.update_current_position(current_x, current_y)
-            self.insert_data(current_x, current_y, min_error, random.uniform(0.5, 1.5), random.uniform(0.5, 1.5))
-            print(f"Min error to closest waypoint: {min_error:.4f}")
-            self.update_error_plot(min_error)
-            # self.rmse += min_error**2
-            # rmse_value = sqrt(self.rmse / self.index)
-            # self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
-            # self.rmseLabel.adjustSize()
-
-        self.last_x = current_x
-        self.last_y = current_y
+            self.last_x = current_x
+            self.last_y = current_y
+        except Exception as e:
+            self.get_logger().error(f"AMCL callback error: {e}")
 
     def fault_callback(self, msg: Bool):
+        """Handle fault message."""
         if msg.data:
             self.light_color_error()
-
-
+            self.get_logger().warn("Fault detected!")
 
 def main(args=None):
-    """Initialize and run the Robot UI Node."""
     rclpy.init(args=args)
     app = QApplication(sys.argv)
     node = RobotUINode()
     node.show()
-
-    # Use QTimer for ROS spin
+    executor = MultiThreadedExecutor()
+    executor.add_node(node)
+    
     spin_timer = QTimer()
     spin_timer.timeout.connect(lambda: rclpy.spin_once(node, timeout_sec=0.0))
-    spin_timer.start(10)
+    spin_timer.start(10)  # 100 Hz
 
     try:
         sys.exit(app.exec_())
@@ -274,21 +259,5 @@ def main(args=None):
         node.destroy_node()
         rclpy.shutdown()
 
-
 if __name__ == "__main__":
     main()
-
-
-# def main(args=None):
-#     rclpy.init(args=args)
-#     app = QApplication([])
-#     node = RobotUINode()
-#     node.show()
-#     # Dùng QTimer để gọi spin_once định kỳ
-#     spin_timer = QTimer()
-#     spin_timer.timeout.connect(lambda: rclpy.spin_once(node, timeout_sec=0.0))
-#     spin_timer.start(10)  # 10ms ~ 100Hz
-#     sys.exit(app.exec_())
-
-# if __name__ == "__main__":
-#     main()
