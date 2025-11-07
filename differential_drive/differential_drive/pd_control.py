@@ -258,11 +258,19 @@ class PDMotionPlanner(Node):
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
         # Parameters
-        self.declare_parameter("kp", 2.0)
-        self.declare_parameter("kd", 0.1)
+        # self.declare_parameter("kp", 2.0)
+        # self.declare_parameter("kd", 0.1)
+        # self.declare_parameter("step_size", 0.2)
+        # self.declare_parameter("max_linear_velocity", 0.3)
+        # self.declare_parameter("max_angular_velocity", 1.0)
+
+
+        self.declare_parameter("kp", 1.5)
+        self.declare_parameter("kd", 0.01)
         self.declare_parameter("step_size", 0.2)
-        self.declare_parameter("max_linear_velocity", 0.3)
-        self.declare_parameter("max_angular_velocity", 1.0)
+        self.declare_parameter("max_linear_velocity", 0.2)
+        self.declare_parameter("max_angular_velocity", 0.2)
+        self.declare_parameter("deathband", 0.1)
 
         self.kp = self.get_parameter("kp").value
         self.kd = self.get_parameter("kd").value
@@ -314,10 +322,11 @@ class PDMotionPlanner(Node):
         dx = next_pose.pose.position.x - robot_pose.pose.position.x
         dy = next_pose.pose.position.y - robot_pose.pose.position.y
         distance = math.sqrt(dx ** 2 + dy ** 2)
-
+        cmd_vel = Twist()
         if distance <= 0.1:
             self.get_logger().info("Goal Reached!")
             self.global_plan.poses.clear()
+            self.cmd_pub.publish(cmd_vel)
             return
 
         self.next_pose_pub.publish(next_pose)
@@ -343,10 +352,11 @@ class PDMotionPlanner(Node):
         next_pose_tf[0][3] = next_pose.pose.position.x
         next_pose_tf[1][3] = next_pose.pose.position.y
 
-        # Compute relative transform: next_pose_robot_tf = robot_tf.inverse() * next_pose_tf
         next_pose_robot_tf = concatenate_matrices(inverse_matrix(robot_tf), next_pose_tf)
-
+        # next_pose_robot_tf = concatenate_matrices(next_pose_tf, inverse_matrix(robot_tf))
         # Extract relative position and orientation
+
+        print(f"Next pose in robot frame: {next_pose_robot_tf[0, 3]}, {next_pose_robot_tf[1, 3]}")
         angular_error = next_pose_robot_tf[1, 3]
         linear_error = next_pose_robot_tf[0, 3] 
 
@@ -355,7 +365,7 @@ class PDMotionPlanner(Node):
         angular_error_derivative = (angular_error - self.prev_angular_error) / dt
         linear_error_derivative = (linear_error - self.prev_linear_error) / dt
 
-        cmd_vel = Twist()
+        
         cmd_vel.angular.z = max(
             -self.max_angular_velocity,
             min(self.kp * angular_error + self.kd * angular_error_derivative, self.max_angular_velocity)

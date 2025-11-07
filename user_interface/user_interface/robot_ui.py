@@ -55,7 +55,7 @@ class RobotUI(QMainWindow):
         # self.error_x = []
         # self.error_y = []
         self.curve_setpoint = self.plot_widget.plot(self.setpoint_x, self.setpoint_y,
-                                                     pen=pg.mkPen(color=(0,0,255), width=4), name="Waypoints")
+                                                     pen=pg.mkPen(color=(0,0,255), width=4), name="Target Path")  #Waypoints
         self.curve_current = self.plot_widget.plot(self.current_x, self.current_y,
                                                    pen=pg.mkPen(color=(0,255,0), width=4), name="Current Position")
         # self.curve_error = self.plot_widget.plot(self.error_x, self.error_y,
@@ -234,13 +234,10 @@ class RobotUI(QMainWindow):
         self.setpoint_y.clear()
         self.current_x.clear()
         self.current_y.clear()
-        self.error_x.clear()
-        self.error_y.clear()
         self.error_history.clear()
         self.error_plot_curve.setData([], [])
         self.curve_setpoint.setData([], [])
         self.curve_current.setData([], [])
-        self.pathLabel.clear()
 
     def plot_setpoint(self, file_path):
         """Load and plot setpoints from CSV."""
@@ -265,6 +262,8 @@ class RobotUI(QMainWindow):
             self.curve_setpoint.setData(self.setpoint_x, self.setpoint_y)
         except Exception as e:
             QMessageBox.warning(self, "CSV Error", f"Failed to load CSV: {e}")
+
+
 
     def update_current_position(self, x, y):
         """Update current position plot, insert NaN on large jumps."""

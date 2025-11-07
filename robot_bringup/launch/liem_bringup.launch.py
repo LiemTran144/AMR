@@ -13,14 +13,11 @@ def generate_launch_description():
     node_path = get_package_share_directory("robot_bringup")
     twist_mux_pkg = get_package_share_directory('twist_mux')
     firmware_pkg_path = get_package_share_directory('nhatbot_firmware')
-    # rviz_path = DeclareLaunchArgument("rviz", default_value=os.path.join(
-    #     get_package_share_directory("robot_bringup"), 
-    #     "rviz", 
-    #     "display_rviz.rviz"))
+    path_planning_pkg = get_package_share_directory('path_planning')
 
     rviz_arg = DeclareLaunchArgument(
         "rviz",
-        default_value=os.path.join(node_path, "rviz", "display_rviz.rviz"),
+        default_value=os.path.join(node_path, "rviz", "test.rviz"),
         description="Path to RViz config file"
     )
    
@@ -28,8 +25,11 @@ def generate_launch_description():
         package='rviz2',
         executable='rviz2',
         name='rviz',
-        arguments=['-d', os.path.join(get_package_share_directory(
-            'robot_bringup'), 'rviz', 'test.rviz')])
+        # THAY ĐỔI QUAN TRỌNG Ở DÒNG DƯỚI
+        arguments=['-d', LaunchConfiguration('rviz')] 
+    )
+
+
 
     joy_node = Node(
         package="joy",
@@ -38,6 +38,7 @@ def generate_launch_description():
         # output="screen",
         parameters=[os.path.join(node_path, "config", "joy_config.yaml")],
     )
+
     
     # joy_teleop = Node(
     #     package="joy_teleop",
@@ -66,26 +67,6 @@ def generate_launch_description():
         #     {"deadzone_threshold": 0.01}  
         # ]
 
-    )
-    
-    speed_control = Node(
-        package="differential_drive",
-        executable="speed_control.py",
-    )
-
-    differentialDrive = Node(
-        package="differential_drive",
-        executable="differentialDrive.py",
-        output="screen",
-    )
-    odom = Node(
-        package="differential_drive",
-        executable="odom.py",
-    )
-
-    pd_control = Node(
-        package="differential_drive",
-        executable="pd_control.py",
     )
 
     # lidar_a1_launch = IncludeLaunchDescription(
@@ -123,6 +104,10 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(
                 firmware_pkg_path,'launch','bringup_hardware_interface.launch.py')))
     
+    path_planning_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(
+                path_planning_pkg,'launch','path_planning.launch.py')))
+    
     initial_pose_publisher = Node(
         package="differential_drive",
         executable="initial_pose.py",
@@ -147,4 +132,5 @@ def generate_launch_description():
         # safety_stop,
         hw_interface_launch,
         # initial_pose_publisher,
+        path_planning_launch,
     ])

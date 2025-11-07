@@ -30,8 +30,10 @@ class RobotUINode(Node, RobotUI):
         self.group_Reent_ = ReentrantCallbackGroup()
 
         self.cmd_pub = self.create_publisher(Twist, '/UI/cmd_vel', 10)
-        self.path_pub = self.create_publisher(Path, '/plan', 10)
+        # self.path_pub = self.create_publisher(Path, '/plan', 10)
 
+
+        self.path_sub = self.create_subscription(Path, '/plan', self.path_callback, 10, callback_group=self.group_Reent_)
         self.odom_sub = self.create_subscription(Odometry, '/liem_controller/odom', self.odom_callback, 10, callback_group=self.group_Reent_)
         self.fault_sub_ = self.create_subscription(Bool, '/liem_controller/fault', self.fault_callback, 10, callback_group=self.group_Reent_)
         self.amcl_sub_ = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.amcl_callback, 10, callback_group=self.group_Reent_)
@@ -56,9 +58,9 @@ class RobotUINode(Node, RobotUI):
         self.rightButton.released.connect(self._stop_publishing)
         self.stopButton.pressed.connect(self._stop_publishing)
 
-        self.sendGoalButton.clicked.connect(self.publish_path)
-        self.loadCSVButton.clicked.connect(self.load_path)
-        self.pauseButton.clicked.connect(self.toggle_pause_path)
+        # self.sendGoalButton.clicked.connect(self.publish_path)
+        # self.loadCSVButton.clicked.connect(self.load_path)
+        # self.pauseButton.clicked.connect(self.toggle_pause_path)
         self.path_msg = None
         self.last_x = None
         self.last_y = None
@@ -71,16 +73,45 @@ class RobotUINode(Node, RobotUI):
         # Waypoints as numpy for optimization
         self.waypoints_np = None
 
-    def toggle_pause_path(self):
-        """Pause or resume path publishing."""
-        if self.is_paused:
-            self.is_paused = False
-            self.pauseButton.setText("Pause Path")
-            self.get_logger().info("Resumed path publishing.")
-        else:
-            self.is_paused = True
-            self.pauseButton.setText("Resume Path")
-            self.get_logger().info("Paused path publishing.")
+    def path_callback(self, msg):
+        """
+        Nhận, xử lý và vẽ dữ liệu đường đi (setpoints) từ tin nhắn nav_msgs/Path.
+        Hàm này được gọi mỗi khi có tin nhắn mới trên topic '/plan'.
+        """
+        # Khởi tạo lại danh sách tọa độ
+        self.rmse_sum = 0.0
+        self.setpoint_x = []
+        self.setpoint_y = []
+        
+        try:
+            # Lặp qua tất cả các điểm (poses) trong tin nhắn Path
+            # msg.poses là một danh sách các 'geometry_msgs/PoseStamped'
+            if msg.poses:
+                for pose_stamped in msg.poses:
+                    # Trích xuất tọa độ x và y từ vị trí (position) của mỗi pose
+                    x = pose_stamped.pose.position.x
+                    y = pose_stamped.pose.position.y
+                    
+                    self.setpoint_x.append(x)
+                    self.setpoint_y.append(y)
+
+            # Cập nhật tổng số điểm
+            self.num_points = len(self.setpoint_x)
+
+            # Build numpy waypoints for efficient distance calc
+            if self.num_points > 0:
+                self.waypoints_np = np.column_stack((self.setpoint_x, self.setpoint_y))
+            else:
+                self.waypoints_np = None
+
+            self.curve_setpoint.setData(self.setpoint_x, self.setpoint_y)
+
+        except Exception as e:
+            if hasattr(self, 'get_logger'):
+                self.get_logger().error(f"Lỗi khi xử lý và vẽ đường đi: {e}")
+            else:
+                # Dự phòng nếu không tìm thấy logger
+                print(f"Lỗi khi xử lý và vẽ đường đi: {e}")
 
     def _publish_current_cmd(self):
         """Publish current Twist command."""
@@ -124,63 +155,6 @@ class RobotUINode(Node, RobotUI):
         self.current_linear = 0.0
         self.current_angular = 0.0
 
-    def load_path(self):
-        """Load path from CSV and prepare for publishing."""
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)")
-        self.pathLabel.setText(file_path)
-        self.pathLabel.adjustSize()
-
-        path = Path()
-        path.header.frame_id = "map"
-        path.header.stamp = self.get_clock().now().to_msg()
-        poses = []
-        waypoints = []
-
-        if file_path:
-            try:
-                self.plot_setpoint(file_path)
-                with open(file_path, 'r') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    if 'x' not in reader.fieldnames or 'y' not in reader.fieldnames:
-                        raise ValueError("CSV must have 'x' and 'y' columns.")
-                    for row in reader:
-                        pose = PoseStamped()
-                        pose.header.frame_id = "map"
-                        pose.header.stamp = self.get_clock().now().to_msg()
-                        pose.pose.position.x = float(row['x'])
-                        pose.pose.position.y = float(row['y'])
-                        pose.pose.position.z = 0.0
-                        pose.pose.orientation.w = 1.0  # Default; add 'qx,qy,qz,qw' if in CSV
-                        poses.append(pose)
-                        waypoints.append([pose.pose.position.x, pose.pose.position.y])
-
-                path.poses = poses
-                self.path_msg = path
-                self.waypoints_np = np.array(waypoints) if waypoints else None  
-                self.get_logger().info(f"Loaded CSV: {file_path} ({len(path.poses)} poses)")
-                # Reset RMSE on new path
-                self.index = 0
-                self.rmse_sum = 0.0
-                # self.rmseLabel.setText("RMSE: 0.0000")
-            except Exception as e:
-                self.get_logger().error(f"Failed to read CSV file: {e}")
-                QMessageBox.warning(self, "CSV Error", str(e))
-                self.path_msg = None
-                self.waypoints_np = None
-        else:
-            self.get_logger().warn("No file selected for CSV.")
-            self.path_msg = None
-            self.waypoints_np = None
-
-    def publish_path(self):
-        """Start continuous path sending."""
-        if self.path_msg and self.path_msg.poses:
-            self.path_msg.header.stamp = self.get_clock().now().to_msg()
-            self.path_pub.publish(self.path_msg)
-        else:
-            self.get_logger().warn("No path available. Please load CSV first.")
-            QMessageBox.warning(self, "Path Error", "No path loaded.")
-
     def odom_callback(self, msg: Odometry):
         """Update velocities and UI lights."""
         try:
@@ -218,10 +192,14 @@ class RobotUINode(Node, RobotUI):
                 # Use latest velocities from odom
                 self.insert_data(current_x, current_y, min_error, self.linear_vel, self.angular_vel)
                 self.update_error_plot(min_error)
-                # self.rmse_sum += min_error ** 2
-                # rmse_value = sqrt(self.rmse_sum / self.index) if self.index > 0 else 0.0
+
+
+                self.rmse_sum += min_error ** 2
+                rmse_value = sqrt(self.rmse_sum / self.index) if self.index > 0 else 0.0
                 # self.rmseLabel.setText(f"RMSE: {rmse_value:.4f}")
                 # self.rmseLabel.adjustSize()
+                self.get_logger().info(f"Current RMSE: {rmse_value:.4f}")
+
 
             self.last_x = current_x
             self.last_y = current_y
@@ -233,29 +211,6 @@ class RobotUINode(Node, RobotUI):
         if msg.data:
             self.light_color_error()
             self.get_logger().warn("Fault detected!")
-
-# def main(args=None):
-#     rclpy.init(args=args)
-#     app = QApplication(sys.argv)
-#     node = RobotUINode()
-#     node.show()
-#     executor = MultiThreadedExecutor()
-#     executor.add_node(node)
-    
-#     spin_timer = QTimer()
-#     spin_timer.timeout.connect(lambda: rclpy.spin_once(node, timeout_sec=0.0))
-#     spin_timer.start(10)  # 100 Hz
-
-#     try:
-#         sys.exit(app.exec_())
-
-#     except KeyboardInterrupt:
-#         pass
-    
-#     finally:
-#         node.destroy_node()
-#         rclpy.shutdown()
-
 
 
 def main(args=None):

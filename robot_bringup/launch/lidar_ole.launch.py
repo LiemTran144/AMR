@@ -93,7 +93,7 @@ def generate_launch_description():
             executable="static_transform_publisher",
             name="lidar_tf_pub",
             output="screen",
-            arguments=['0.195', '0.0', '0.0557', "0.0", "0.0", "0.0", "base_link", "laser"]   #"0.15", "0.0", "0.07" lidar a1       
+            arguments=['0.195', '0.0', '0.0557', "0.0", "0.0", "0.0", "base_link", "laser"]   #"0.15", "0.0", "0.07" lidar a1      
         ),
 
     ])

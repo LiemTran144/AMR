@@ -1,6 +1,7 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
@@ -25,38 +26,39 @@ def generate_launch_description():
     use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
         default_value="false",)
-
-    nav2_planner_server = LifecycleNode(
-        package="nav2_planner",
-        executable="planner_server",
-        name="planner_server",
+    
+    nav2_smoother_server = LifecycleNode(
+        package="nav2_smoother",
+        executable="smoother_server",
+        name="smoother_server",
         output="screen",
         parameters=[
             os.path.join(
                 path_planning_pkg,
                 "config",
-                "planner_server.yaml"),
+                "smoother_server.yaml"),
             {"use_sim_time": use_sim_time}
         ],
         namespace="",
     )
 
-    configure_planner = EmitEvent(
+    configure_smoother = EmitEvent(
         event=ChangeState(
-            lifecycle_node_matcher=matches_action(nav2_planner_server),
+            lifecycle_node_matcher=matches_action(nav2_smoother_server),
             transition_id=lifecycle_msgs.msg.Transition.TRANSITION_CONFIGURE,
         )
     )
 
     # Activate events for both servers
-    activate_planner = RegisterEventHandler(
+
+    activate_smoother = RegisterEventHandler(
         OnStateTransition(
-            target_lifecycle_node=nav2_planner_server,
+            target_lifecycle_node=nav2_smoother_server,
             goal_state="inactive",
             entities=[
-                LogInfo(msg="[LifecycleLaunch] Planner server is activating."),
+                LogInfo(msg="[LifecycleLaunch] Smoother server is activating."),
                 EmitEvent(event=ChangeState(
-                    lifecycle_node_matcher=matches_action(nav2_planner_server),
+                    lifecycle_node_matcher=matches_action(nav2_smoother_server),
                     transition_id=lifecycle_msgs.msg.Transition.TRANSITION_ACTIVATE,
                 )),
             ],
@@ -68,7 +70,7 @@ def generate_launch_description():
         OnShutdown(
             on_shutdown=[
                 EmitEvent(event=ChangeState(
-                    lifecycle_node_matcher=matches_node_name(node_name="planner_server"),
+                    lifecycle_node_matcher=matches_node_name(node_name="smoother_server"),
                     transition_id=lifecycle_msgs.msg.Transition.TRANSITION_ACTIVE_SHUTDOWN,
                 )),
                 LogInfo(msg="[LifecycleLaunch] Lifecycle nodes are shutting down."),
@@ -78,8 +80,8 @@ def generate_launch_description():
 
     return LaunchDescription([
         use_sim_time_arg,
-        nav2_planner_server,
-        configure_planner, 
-        activate_planner,
+        nav2_smoother_server,
+        configure_smoother, 
+        activate_smoother,
         shutdown_event,
     ])

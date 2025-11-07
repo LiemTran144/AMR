@@ -18,31 +18,55 @@
 
 namespace nhatbot_planning
 {
-struct GraphNode
-{
-    int x;
-    int y;
-    int cost;
-    double heuristic;
-    std::shared_ptr<GraphNode> prev;
+// struct GraphNode
+// {
+//     int x;
+//     int y;
+//     int cost;
+//     double heuristic;
+//     std::shared_ptr<GraphNode> prev;
 
-    GraphNode() : GraphNode(0,0) {}
+//     GraphNode() : GraphNode(0,0) {}
 
-    GraphNode(int in_x, int in_y) : x(in_x), y(in_y), cost(0){}
+//     GraphNode(int in_x, int in_y) : x(in_x), y(in_y), cost(0){}
 
-    bool operator>(const GraphNode & other) const { 
+//     bool operator>(const GraphNode & other) const { 
+//         return cost + heuristic > other.cost + other.heuristic;
+//     }
+
+//     bool operator==(const GraphNode & other) const {
+//         return x == other.x && y == other.y;
+//     }
+
+//     GraphNode operator+(std::pair<int, int> const & other) {
+//         GraphNode res(x + other.first, y + other.second);
+//         return res;
+//     }
+// };
+
+    struct GraphNode
+    {
+        int x{0};
+        int y{0};
+        double cost{0.0};
+        double heuristic{0.0};
+        std::shared_ptr<GraphNode> prev{nullptr};
+        GraphNode() = default;
+        GraphNode(int xi, int yi) : x(xi), y(yi) {}
+        bool operator>(const GraphNode & other) const { 
         return cost + heuristic > other.cost + other.heuristic;
-    }
+        }
 
-    bool operator==(const GraphNode & other) const {
-        return x == other.x && y == other.y;
-    }
+        bool operator==(const GraphNode & other) const {
+            return x == other.x && y == other.y;
+        }
 
-    GraphNode operator+(std::pair<int, int> const & other) {
+        GraphNode operator+(std::pair<int, int> const & other) {
         GraphNode res(x + other.first, y + other.second);
         return res;
-    }
-};
+        }
+        inline double totalCost() const { return cost + heuristic; }
+    };
 
 class AStarPlanner_Smoother : public nav2_core::GlobalPlanner
 {
@@ -63,12 +87,14 @@ class AStarPlanner_Smoother : public nav2_core::GlobalPlanner
                                         const geometry_msgs::msg::PoseStamped &goal) override;
 
     private:
-        
 
+        rclcpp_lifecycle::LifecycleNode::SharedPtr node_;
         std::shared_ptr<tf2_ros::Buffer> tf_;
-        nav2_util::LifecycleNode::SharedPtr node_;
-        nav2_costmap_2d::Costmap2D *costmap_;
-        std::string global_frame_, name_;
+        // nav2_costmap_2d::Costmap2D * costmap_{nullptr};
+        std::vector<geometry_msgs::msg::Point> footprint_;
+        std::string global_frame_;
+        std::string name_;
+        nav2_costmap_2d::Costmap2D* costmap_ = nullptr;
 
 
         bool poseOnMap(const GraphNode & node);
@@ -80,7 +106,7 @@ class AStarPlanner_Smoother : public nav2_core::GlobalPlanner
         unsigned int poseToCell(const GraphNode & node);
         double manhattanDistance(const GraphNode & node, const GraphNode &goal_node);
     };
-}  // namespace bumperbot_planning
+}  // namespace path_planning
 
 
 #endif 

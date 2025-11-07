@@ -11,6 +11,7 @@ install(
   PROGRAMS
   ${PROJECT_NAME}/ui_Node.py
   ${PROJECT_NAME}/robot_ui.py
+  ${PROJECT_NAME}/capstones_UI.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

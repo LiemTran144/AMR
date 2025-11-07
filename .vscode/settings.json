@@ -69,7 +69,8 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "csignal": "cpp",
-        "cfenv": "cpp"
+        "cfenv": "cpp",
+        "queue": "cpp"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

@@ -12,8 +12,8 @@ planner_server:
 
     # A* Planner parameters
     GridBased:
+      # plugin: "nhatbot_planning::AStarPlanner"
       plugin: "nhatbot_planning::AStarPlanner_Smoother"
-      # plugin: "nhatbot_planning::AStarPlanner_Smoother"
 
     # Smac 2D parameters
     # GridBased_nav2:
