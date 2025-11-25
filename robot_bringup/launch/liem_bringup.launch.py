@@ -108,13 +108,6 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(
                 path_planning_pkg,'launch','path_planning.launch.py')))
     
-    initial_pose_publisher = Node(
-        package="differential_drive",
-        executable="initial_pose.py",
-        name="initial_pose_publisher",
-        output="screen",
-    )
-    
     return LaunchDescription([
         rviz_arg,
         rviz_node,
@@ -131,6 +124,5 @@ def generate_launch_description():
         lidar_ole_launch,
         # safety_stop,
         hw_interface_launch,
-        # initial_pose_publisher,
         path_planning_launch,
     ])

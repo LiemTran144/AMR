@@ -5,11 +5,6 @@ planner_server:
     # planner_plugins: ["GridBased", GridBasedFast]
     planner_plugins: ['GridBased']
 
-    # # Dijkstra Planner parameters
-    # GridBased:
-    #   # plugin: "nhatbot_planning::DijkstraPlanner"
-    #   plugin: "nhatbot_planning::DijkstraPlanner_Smoother"
-
     # A* Planner parameters
     GridBased:
       # plugin: "nhatbot_planning::AStarPlanner"
@@ -58,7 +53,7 @@ global_costmap:
         enabled: True
         observation_sources: scan # observation source is the scan
         scan: # Specific configuration
-          topic: /scan   #/scan_filtered
+          topic: /scan_filtered   #/scan
           data_type: "LaserScan"
           max_obstacle_height: 2.0
           clearing: True

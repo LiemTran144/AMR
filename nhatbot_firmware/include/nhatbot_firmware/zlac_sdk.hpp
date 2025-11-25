@@ -64,12 +64,7 @@ namespace zlac_modbus
         float travel_in_one_rev_ = 0.336;
         float R_Wheel_ = 0.0535;
 
-
-        
-
-
     public:
-
 
         bool openDriver(const std::string& port, int baudrate = 115200, int slave = 1);
         void closeDriver();
@@ -106,9 +101,6 @@ namespace zlac_modbus
         std::pair<float, float> get_linear_velocities();
         float rpm_to_linear(float rpm);
         std::pair<float, float> get_wheel_angular_velocities();
-
-
-
     };
 
 }

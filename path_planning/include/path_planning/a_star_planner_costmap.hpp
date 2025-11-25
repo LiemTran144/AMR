@@ -71,6 +71,7 @@ private:
 
     unsigned int poseToCell(const GraphNode & node);
     double manhattanDistance(const GraphNode & node, const GraphNode &goal_node);
+    double euclideanDistance(const GraphNode & node, const GraphNode &goal_node);
 };
 }  // namespace bumperbot_planning
 

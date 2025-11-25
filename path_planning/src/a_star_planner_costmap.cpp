@@ -4,6 +4,7 @@
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include <vector>
 #include <chrono>
+#include <thread>
 
 namespace nhatbot_planning
 {
@@ -35,49 +36,6 @@ namespace nhatbot_planning
         visited_map_.info = map->info;
         visited_map_.data = std::vector<int8_t>(visited_map_.info.height * visited_map_.info.width, -1);
     }
-
-    // void AStarPlanner::goalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr pose)
-    // {
-    //     RCLCPP_INFO(this->get_logger(), "Goal pose received at (%.2f, %.2f)", pose->pose.position.x, pose->pose.position.y);
-    //     RCLCPP_INFO(this->get_logger(), "Frame id: %s", pose->header.frame_id.c_str());
-    //     if(!map_)
-    //     {
-    //         RCLCPP_ERROR(get_logger(), "No map received!");
-    //         return;
-    //     }
-
-    //     visited_map_.data = std::vector<int8_t>(visited_map_.info.height * visited_map_.info.width, -1);
-
-    //     geometry_msgs::msg::TransformStamped map_to_base_tf;
-    //     try 
-    //     {
-    //         map_to_base_tf = tf_buffer_->lookupTransform(map_->header.frame_id, "base_link", tf2::TimePointZero);
-    //     } 
-    //     catch (const tf2::TransformException & ex) 
-    //     {
-    //         RCLCPP_ERROR(get_logger(), "Could not transform from map to base_link");
-    //         return;
-    //     }
-
-    //     geometry_msgs::msg::Pose map_to_base_pose;
-    //     map_to_base_pose.position.x = map_to_base_tf.transform.translation.x;
-    //     map_to_base_pose.position.y = map_to_base_tf.transform.translation.y;
-    //     map_to_base_pose.orientation = map_to_base_tf.transform.rotation;
-
-    //     auto path = plan(map_to_base_pose, pose->pose);
-
-    //     if (!path.poses.empty()) 
-    //     {
-    //         RCLCPP_INFO(this->get_logger(), "Shortest path found!");
-    //         path_pub_->publish(path);
-    //     } 
-    //     else 
-    //     {
-    //         RCLCPP_WARN(this->get_logger(), "No path found to the goal.");
-    //     }
-    // }
-
-
 
     void AStarPlanner::goalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr pose)
     {
@@ -139,7 +97,8 @@ namespace nhatbot_planning
         };
 
         // std::vector<std::pair<int, int>> explore_directions = {
-        //     {1, 0}, {0, 1}, {-1, 0}, {0, -1}
+        //     {1, 0}, {1, 1}, {0, 1}, {-1, 1},
+        //     {-1, 0}, {-1, -1}, {0, -1}, {1, -1}
         // };
         std::priority_queue<GraphNode, std::vector<GraphNode>, std::greater<GraphNode>> pending_nodes;
         std::vector<GraphNode> visited_nodes;
@@ -147,6 +106,7 @@ namespace nhatbot_planning
         GraphNode start_node = worldToGrid(start);
         GraphNode goal_node = worldToGrid(goal);
         start_node.heuristic = manhattanDistance(start_node, goal_node);
+        // start_node.heuristic = euclideanDistance(start_node, goal_node);
         pending_nodes.push(start_node);
 
         GraphNode active_node;
@@ -169,6 +129,8 @@ namespace nhatbot_planning
                     // If the node is not visited, add it to the queue
                     new_node.cost = active_node.cost + 1 + map_->data.at(poseToCell(new_node));
                     new_node.heuristic = manhattanDistance(new_node, goal_node);
+                    // new_node.cost = active_node.cost + sqrt(2) + map_->data.at(poseToCell(new_node));
+                    // new_node.heuristic = euclideanDistance(new_node, goal_node);
                     new_node.prev = std::make_shared<GraphNode>(active_node);
                     pending_nodes.push(new_node);
                     visited_nodes.push_back(new_node);
@@ -176,6 +138,7 @@ namespace nhatbot_planning
             }
 
             visited_map_.data.at(poseToCell(active_node)) = -106;  // Blue
+            // std::this_thread::sleep_for(std::chrono::milliseconds(50));
             map_pub_->publish(visited_map_);
         }
 
@@ -226,7 +189,7 @@ namespace nhatbot_planning
     }
     double AStarPlanner::euclideanDistance(const GraphNode & node, const GraphNode &goal_node)
     {
-        return abs(node.x - goal_node.x) + abs(node.y - goal_node.y);
+        return sqrt(pow(node.x - goal_node.x, 2) + pow(node.y - goal_node.y, 2));
     }
 }  
 

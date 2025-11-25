@@ -106,7 +106,7 @@ class PurePursuit(Node):
         #  Create and publish the velocity command
         cmd_vel = Twist()
         cmd_vel.linear.x = self.max_linear_velocity
-        cmd_vel.angular.z = curvature * self.max_angular_velocity
+        cmd_vel.angular.z = curvature * self.max_angular_velocity  
         self.cmd_pub.publish(cmd_vel)
 
     def get_carrot_pose(self, robot_pose: PoseStamped) -> PoseStamped:
@@ -159,7 +159,7 @@ class PurePursuit(Node):
             pose_matrix[0][3] = pose.pose.position.x
             pose_matrix[1][3] = pose.pose.position.y
 
-            transformed_pose = concatenate_matrices(pose_matrix,transform_matrix)
+            transformed_pose = concatenate_matrices(transform_matrix, pose_matrix)
             [pose.pose.orientation.x,pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w] = quaternion_from_matrix(transformed_pose)
             [pose.pose.position.x, pose.pose.position.y, pose.pose.position.z] = translation_from_matrix(transformed_pose)
 

@@ -65,7 +65,7 @@ namespace nhatbot_planning
         GraphNode res(x + other.first, y + other.second);
         return res;
         }
-        inline double totalCost() const { return cost + heuristic; }
+        inline double totalCost() const { return cost + heuristic; }  
     };
 
 class AStarPlanner_Smoother : public nav2_core::GlobalPlanner
@@ -90,13 +90,14 @@ class AStarPlanner_Smoother : public nav2_core::GlobalPlanner
 
         rclcpp_lifecycle::LifecycleNode::SharedPtr node_;
         std::shared_ptr<tf2_ros::Buffer> tf_;
-        // nav2_costmap_2d::Costmap2D * costmap_{nullptr};
+        nav2_costmap_2d::Costmap2D * costmap_{nullptr};  
         std::vector<geometry_msgs::msg::Point> footprint_;
         std::string global_frame_;
         std::string name_;
-        nav2_costmap_2d::Costmap2D* costmap_ = nullptr;
+        // nav2_costmap_2d::Costmap2D* costmap_ = nullptr;
 
-
+        rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr raw_path_pub_;
+        
         bool poseOnMap(const GraphNode & node);
 
         GraphNode worldToGrid(const geometry_msgs::msg::Pose & pose);
@@ -105,8 +106,8 @@ class AStarPlanner_Smoother : public nav2_core::GlobalPlanner
 
         unsigned int poseToCell(const GraphNode & node);
         double manhattanDistance(const GraphNode & node, const GraphNode &goal_node);
+        double euclideanDistance(const GraphNode & node, const GraphNode &goal_node);
     };
 }  // namespace path_planning
-
 
 #endif 

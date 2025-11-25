@@ -34,8 +34,8 @@ class RobotUINode(Node, RobotUI):
 
 
         self.path_sub = self.create_subscription(Path, '/plan', self.path_callback, 10, callback_group=self.group_Reent_)
-        self.odom_sub = self.create_subscription(Odometry, '/liem_controller/odom', self.odom_callback, 10, callback_group=self.group_Reent_)
-        self.fault_sub_ = self.create_subscription(Bool, '/liem_controller/fault', self.fault_callback, 10, callback_group=self.group_Reent_)
+        self.odom_sub = self.create_subscription(Odometry, '/diff_drive_controller/odom', self.odom_callback, 10, callback_group=self.group_Reent_)
+        # self.fault_sub_ = self.create_subscription(Bool, '/liem_controller/fault', self.fault_callback, 10, callback_group=self.group_Reent_)
         self.amcl_sub_ = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.amcl_callback, 10, callback_group=self.group_Reent_)
 
         self.cmd_timer = QTimer(self)
@@ -160,11 +160,12 @@ class RobotUINode(Node, RobotUI):
         try:
             self.linear_vel = msg.twist.twist.linear.x
             self.angular_vel = msg.twist.twist.angular.z
-            self.update_Velocity(self.linear_vel, self.angular_vel)
+            
             if abs(self.linear_vel) <= 0.01 and abs(self.angular_vel) <= 0.01:
                 self.light_color_stop()
             else:
                 self.light_color_run()
+                self.update_Velocity(self.linear_vel, self.angular_vel)
         except Exception as e:
             self.get_logger().error(f"Odom callback error: {e}")
 
@@ -206,11 +207,11 @@ class RobotUINode(Node, RobotUI):
         except Exception as e:
             self.get_logger().error(f"AMCL callback error: {e}")
 
-    def fault_callback(self, msg: Bool):
-        """Handle fault message."""
-        if msg.data:
-            self.light_color_error()
-            self.get_logger().warn("Fault detected!")
+    # def fault_callback(self, msg: Bool):
+    #     """Handle fault message."""
+    #     if msg.data:
+    #         self.light_color_error()
+    #         self.get_logger().warn("Fault detected!")
 
 
 def main(args=None):

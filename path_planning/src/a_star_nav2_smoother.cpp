@@ -7,15 +7,15 @@
 #include <vector>
 #include <unordered_set>
 
-static geometry_msgs::msg::Quaternion yawToQuat(double yaw)
-{
-  geometry_msgs::msg::Quaternion q;
-  q.w = std::cos(yaw * 0.5);
-  q.x = 0.0;
-  q.y = 0.0;
-  q.z = std::sin(yaw * 0.5);
-  return q;
-}
+// static geometry_msgs::msg::Quaternion yawToQuat(double yaw)
+// {
+//   geometry_msgs::msg::Quaternion q;
+//   q.w = std::cos(yaw * 0.5);
+//   q.x = 0.0;
+//   q.y = 0.0;
+//   q.z = std::sin(yaw * 0.5);
+//   return q;
+// }
 
 namespace nhatbot_planning
 {
@@ -32,7 +32,12 @@ namespace nhatbot_planning
 
         rclcpp::QoS smooth_qos(10);
         smooth_client_ = rclcpp_action::create_client<nav2_msgs::action::SmoothPath>(node_.get(), "smooth_path");
-        RCLCPP_INFO(node_->get_logger(), "LETHAL_OBSTACLE: %d", nav2_costmap_2d::LETHAL_OBSTACLE); 
+
+        rclcpp::QoS latching_qos(1);
+        latching_qos.transient_local(); //
+        
+        raw_path_pub_ = node_->create_publisher<nav_msgs::msg::Path>(
+            "/raw_plan", latching_qos);
     }
 
     void AStarPlanner_Smoother::activate() {}
@@ -57,11 +62,12 @@ namespace nhatbot_planning
         }
 
         auto cmp = [](const GraphNode & a, const GraphNode & b) {return a.totalCost() > b.totalCost();};
-        std::priority_queue<GraphNode, std::vector<GraphNode>, decltype(cmp)> pending_nodes(cmp);
-        std::unordered_set<unsigned int> visited_nodes;
+        std::priority_queue<GraphNode, std::vector<GraphNode>, decltype(cmp)> pending_nodes(cmp); // open list 
+        std::unordered_set<unsigned int> visited_nodes;  // closed list 
 
         start_node.cost = 0;
         start_node.heuristic = manhattanDistance(start_node, goal_node);
+        // start_node.heuristic = euclideanDistance(start_node, goal_node);
         pending_nodes.push(start_node);
         GraphNode active_node;
         bool found = false;
@@ -84,21 +90,37 @@ namespace nhatbot_planning
                 GraphNode(active_node.x, active_node.y - 1)
             };
 
+            // std::array<GraphNode, 8> neighbors = {
+            //     GraphNode(active_node.x + 1, active_node.y),
+            //     GraphNode(active_node.x + 1, active_node.y + 1),
+            //     GraphNode(active_node.x, active_node.y + 1),
+            //     GraphNode(active_node.x - 1, active_node.y + 1),
+            //     GraphNode(active_node.x - 1, active_node.y),
+            //     GraphNode(active_node.x - 1, active_node.y - 1),
+            //     GraphNode(active_node.x, active_node.y - 1),
+            //     GraphNode(active_node.x + 1, active_node.y - 1)
+            // };
+
             for(auto & new_node : neighbors)
             {
                 if(!poseOnMap(new_node))
                     continue;
 
                 auto cell_cost = costmap_->getCost(new_node.x, new_node.y);
-                if(cell_cost >= nav2_costmap_2d::LETHAL_OBSTACLE)  
+                // RCLCPP_INFO(node_->get_logger(), "Checking node (%d, %d) with cost %u", new_node.x, new_node.y, cell_cost);
+                if(cell_cost >= nav2_costmap_2d::LETHAL_OBSTACLE)  // ~~ if(cell_cost == nav2_costmap_2d::LETHAL_OBSTACLE || cell_cost == nav2_costmap_2d::NO_INFORMATION)
                     continue;
 
                 unsigned int cell_idx = poseToCell(new_node);
                 if(visited_nodes.find(cell_idx) == visited_nodes.end()) {
                     visited_nodes.insert(cell_idx);
 
-                    new_node.cost = active_node.cost + 1 + costmap_->getCost(new_node.x, new_node.y);
+                    auto move_cost = sqrt((active_node.x - new_node.x)* (active_node.x - new_node.x)
+                                        + (active_node.y - new_node.y)* (active_node.y - new_node.y));
+
+                    new_node.cost = active_node.cost + move_cost + costmap_->getCost(new_node.x, new_node.y);
                     new_node.heuristic = manhattanDistance(new_node, goal_node);
+                    // new_node.heuristic = euclideanDistance(new_node, goal_node);
                     new_node.prev = std::make_shared<GraphNode>(active_node);
                     pending_nodes.push(new_node);
                 }
@@ -123,8 +145,9 @@ namespace nhatbot_planning
         }
         std::reverse(path.poses.begin(), path.poses.end());
 
+        raw_path_pub_->publish(path);  // Publish raw path before smoothing
+
         if(smooth_client_->action_server_is_ready()) {
-            RCLCPP_INFO(node_->get_logger(), "Smoothing path with %zu poses", path.poses.size());
             
             nav2_msgs::action::SmoothPath::Goal path_smooth;
             // --- Cleanup before smoothing ---
@@ -147,19 +170,20 @@ namespace nhatbot_planning
               }
               path.poses.swap(cleaned);
             }
-            if (!path.poses.empty()) {
-              for (size_t i = 0; i + 1 < path.poses.size(); ++i) {
-                const auto &p0 = path.poses[i].pose.position;
-                const auto &p1 = path.poses[i + 1].pose.position;
-                double yaw = std::atan2(p1.y - p0.y, p1.x - p0.x);
-                path.poses[i].pose.orientation = yawToQuat(yaw);
-              }
-              if (path.poses.size() >= 2) {
-                path.poses.back().pose.orientation = path.poses[path.poses.size() - 2].pose.orientation;
-              } else {
-                path.poses.back().pose.orientation = yawToQuat(0.0);
-              }
-            }
+            // if (!path.poses.empty()) {
+            //   for (size_t i = 0; i + 1 < path.poses.size(); ++i) {
+            //     const auto &p0 = path.poses[i].pose.position;
+            //     const auto &p1 = path.poses[i + 1].pose.position;
+            //     // double yaw = std::atan2(p1.y - p0.y, p1.x - p0.x);
+            //     // path.poses[i].pose.orientation = yawToQuat(yaw);
+            //   }
+            //   if (path.poses.size() >= 2) {
+            //     path.poses.back().pose.orientation = path.poses[path.poses.size() - 2].pose.orientation;
+            //   } else {
+            //     // path.poses.back().pose.orientation = yawToQuat(0.0);
+            //   }
+            // }
+
             // --- End cleanup ---
             path_smooth.path = path;
             path_smooth.check_for_collisions = false;
@@ -220,6 +244,12 @@ namespace nhatbot_planning
     {
         return abs(node.x - goal_node.x) + abs(node.y - goal_node.y);
     }
+
+    double AStarPlanner_Smoother::euclideanDistance(const GraphNode & node, const GraphNode &goal_node)
+    {
+        return sqrt(pow(node.x - goal_node.x, 2) + pow(node.y - goal_node.y, 2));
+    }
 }  
+
 #include "pluginlib/class_list_macros.hpp"
 PLUGINLIB_EXPORT_CLASS(nhatbot_planning::AStarPlanner_Smoother, nav2_core::GlobalPlanner)
