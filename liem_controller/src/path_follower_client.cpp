@@ -109,8 +109,7 @@
 namespace liem_controller
 {
 
-PathFollower::PathFollower(const rclcpp::NodeOptions & options)
-: Node("path_follower_node", options)
+PathFollower::PathFollower(const rclcpp::NodeOptions & options): Node("path_follower_node", options)
 {
     // create action client to /follow_path
     client_ = rclcpp_action::create_client<FollowPath>(
@@ -163,9 +162,7 @@ void PathFollower::goal_response_callback(const GoalHandleFollowPath::SharedPtr 
     }
 }
 
-void PathFollower::feedback_callback(
-    GoalHandleFollowPath::SharedPtr,
-    const std::shared_ptr<const FollowPath::Feedback> feedback)
+void PathFollower::feedback_callback(GoalHandleFollowPath::SharedPtr, const std::shared_ptr<const FollowPath::Feedback> feedback)
 {
     // Throttle log để không bị spam màn hình
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000, 

@@ -80,6 +80,7 @@ class RobotUINode(Node, RobotUI):
         """
         # Khởi tạo lại danh sách tọa độ
         self.rmse_sum = 0.0
+        self.index = 0
         self.setpoint_x = []
         self.setpoint_y = []
         
@@ -105,6 +106,7 @@ class RobotUINode(Node, RobotUI):
                 self.waypoints_np = None
 
             self.curve_setpoint.setData(self.setpoint_x, self.setpoint_y)
+            self.error_history.clear()
 
         except Exception as e:
             if hasattr(self, 'get_logger'):
@@ -184,9 +186,7 @@ class RobotUINode(Node, RobotUI):
                 distances = np.sqrt(np.sum((self.waypoints_np - np.array([current_x, current_y]))**2, axis=1)) 
                 min_idx = np.argmin(distances)   
                 min_error = distances[min_idx]
-                # closest_waypoint_x, closest_waypoint_y = self.waypoints_np[min_idx]
 
-                # self.update_error(current_x, closest_waypoint_x, current_y, closest_waypoint_y)
 
             if current_x != self.last_x or current_y != self.last_y:
                 self.update_current_position(current_x, current_y)

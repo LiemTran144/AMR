@@ -8,6 +8,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
 
 def generate_launch_description():
     node_path = get_package_share_directory("robot_bringup")
@@ -15,9 +16,15 @@ def generate_launch_description():
     firmware_pkg_path = get_package_share_directory('nhatbot_firmware')
     path_planning_pkg = get_package_share_directory('path_planning')
 
+    use_rviz_arg = DeclareLaunchArgument(
+        "use_rviz",
+        default_value="true",
+        description="Whether to launch RViz"
+    )
+
     rviz_arg = DeclareLaunchArgument(
         "rviz",
-        default_value=os.path.join(node_path, "rviz", "test.rviz"),
+        default_value=os.path.join(node_path, "rviz", "display_rviz.rviz"),
         description="Path to RViz config file"
     )
    
@@ -25,8 +32,9 @@ def generate_launch_description():
         package='rviz2',
         executable='rviz2',
         name='rviz',
-        # THAY ĐỔI QUAN TRỌNG Ở DÒNG DƯỚI
-        arguments=['-d', LaunchConfiguration('rviz')] 
+        output='screen',
+        arguments=['-d', LaunchConfiguration('rviz'),],
+        condition=IfCondition(LaunchConfiguration("use_rviz")) 
     )
 
 
@@ -40,11 +48,11 @@ def generate_launch_description():
     )
 
     
-    # joy_teleop = Node(
-    #     package="joy_teleop",
-    #     executable="joy_teleop",
-    #     parameters=[os.path.join(node_path, "config", "joy_teleop.yaml")],
-    # )
+    joy_teleop = Node(
+        package="joy_teleop",
+        executable="joy_teleop",
+        parameters=[os.path.join(node_path, "config", "joy_teleop.yaml")],
+    )
 
 
     twist_relay_node = Node(
@@ -93,7 +101,7 @@ def generate_launch_description():
 
     provide_map = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
-                node_path,'launch/provide_map.launch.py')))
+                node_path,'launch/provide_map.launch.py')))  # include map server and amcl
     
     safety_stop = Node(
         package="safety",
@@ -110,6 +118,7 @@ def generate_launch_description():
     
     return LaunchDescription([
         rviz_arg,
+        use_rviz_arg,
         rviz_node,
         joy_node,
         # speed_control,
@@ -117,6 +126,7 @@ def generate_launch_description():
         # pd_control,
         # odom, 
         # lidar_a1_launch,
+        joy_teleop,
         twist_mux_launch,
         twist_relay_node,
         joy_to_twist,

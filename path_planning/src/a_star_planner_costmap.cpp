@@ -93,7 +93,7 @@ namespace nhatbot_planning
     nav_msgs::msg::Path AStarPlanner::plan(const geometry_msgs::msg::Pose & start, const geometry_msgs::msg::Pose & goal)
     {
         std::vector<std::pair<int, int>> explore_directions = {
-            {-1, 0}, {1, 0}, {0, -1}, {0, 1}
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1}
         };
 
         // std::vector<std::pair<int, int>> explore_directions = {
@@ -106,7 +106,7 @@ namespace nhatbot_planning
         GraphNode start_node = worldToGrid(start);
         GraphNode goal_node = worldToGrid(goal);
         start_node.heuristic = manhattanDistance(start_node, goal_node);
-        // start_node.heuristic = euclideanDistance(start_node, goal_node);
+        // start_node.heuristic = 0;
         pending_nodes.push(start_node);
 
         GraphNode active_node;
@@ -128,6 +128,7 @@ namespace nhatbot_planning
                     {
                     // If the node is not visited, add it to the queue
                     new_node.cost = active_node.cost + 1 + map_->data.at(poseToCell(new_node));
+                    // new_node.heuristic = 0;
                     new_node.heuristic = manhattanDistance(new_node, goal_node);
                     // new_node.cost = active_node.cost + sqrt(2) + map_->data.at(poseToCell(new_node));
                     // new_node.heuristic = euclideanDistance(new_node, goal_node);
@@ -137,7 +138,7 @@ namespace nhatbot_planning
                 }
             }
 
-            visited_map_.data.at(poseToCell(active_node)) = -106;  // Blue
+            visited_map_.data.at(poseToCell(active_node)) = -106;  
             // std::this_thread::sleep_for(std::chrono::milliseconds(50));
             map_pub_->publish(visited_map_);
         }

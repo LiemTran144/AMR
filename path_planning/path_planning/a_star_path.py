@@ -82,14 +82,14 @@ class AStarPlanner(Node):
         time_end = time.time_ns()
 
         if path.poses: 
-            self.get_logger().info(f"Shortest path found with {len(path.poses)} poses")
-            self.get_logger().info(f"Planning time: {time_end - time_start} ns")
+            # self.get_logger().info(f"Shortest path found with {len(path.poses)} poses")
+            # self.get_logger().info(f"Planning time: {time_end - time_start} ns")
             self.path_pub.publish(path)
         else:
             self.get_logger().warn("No path found to the goal.")
 
     def plan(self, start: Pose, goal: Pose):
-        explore_directions = [(-1, 0), (1, 0), (0, 1), (0, -1)] # 4-connected
+        explore_directions = [(1, 0), (0, 1), (-1, 0), (0, -1)] # 4-connected
         pending_nodes = PriorityQueue()  
         visited_nodes = set()          
         
@@ -108,13 +108,14 @@ class AStarPlanner(Node):
         
         while not pending_nodes.empty() and rclpy.ok():
             active_node = pending_nodes.get()
+            # self.get_logger().info(f"Exploring Node: ({active_node.x}, {active_node.y}), g(n): {active_node.cost}, h(n): { active_node.heuristic}")
             
             if active_node == goal_node:
                 path_found = True
                 break
 
             visited_nodes.add((active_node.x, active_node.y))
-            self.visited_map.data[self.pose_to_cell(active_node)] = 100
+            self.visited_map.data[self.pose_to_cell(active_node)] = -111 #color orange
 
             for dir_x, dir_y in explore_directions:
                 new_node = GraphNode(active_node.x + dir_x, active_node.y + dir_y)
@@ -129,16 +130,27 @@ class AStarPlanner(Node):
                 if cell_index >= len(self.map_.data):
                     continue
                     
-                if self.map_.data[cell_index] > 0:  # Occupied
+                if self.map_.data[cell_index] > 0:  # check if occupied
                     continue
 
                 new_node.cost = active_node.cost + 1
                 new_node.heuristic = self.manhattan_distance(new_node, goal_node)
-                new_node.prev = active_node
-                pending_nodes.put(new_node)
 
-            if pending_nodes.qsize() % 50 == 0:
+                #cost of new_node plus heuristic
+                # self.get_logger().info(f"New Node: ({new_node.x}, {new_node.y}), g(n): {new_node.cost}, h(n): { new_node.heuristic}")
+
+                new_node.prev = active_node
+
+                pending_nodes.put(new_node)
+                # time.sleep(0.01)  # Small delay to allow map publishing
                 self.map_pub.publish(self.visited_map)
+
+
+            # if pending_nodes.qsize() % 1 == 0:
+            #     self.visited_map.header.stamp = self.get_clock().now().to_msg()
+            #     self.map_pub.publish(self.visited_map)
+
+                    
 
         path = Path()
         path.header.frame_id = self.map_.header.frame_id
@@ -159,8 +171,8 @@ class AStarPlanner(Node):
             path_points.reverse()
             path.poses = path_points
             self.get_logger().info(f"Path reconstructed with {len(path.poses)} points")
-
-        self.map_pub.publish(self.visited_map)
+        
+        # self.map_pub.publish(self.visited_map)
         return path
 
     def grid_to_world(self, node: GraphNode) -> Pose:

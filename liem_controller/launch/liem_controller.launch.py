@@ -11,7 +11,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     use_sim_time = LaunchConfiguration("use_sim_time")
-    lifecycle_nodes = [  "controller_server" ]
+    lifecycle_nodes = [ "controller_server" ]
     controller_pkg = get_package_share_directory("liem_controller")
 
     use_sim_time_arg = DeclareLaunchArgument(

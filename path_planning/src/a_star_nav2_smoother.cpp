@@ -28,16 +28,19 @@ namespace nhatbot_planning
         tf_ = tf;
         costmap_ = costmap_ros->getCostmap(); 
         global_frame_ = costmap_ros->getGlobalFrameID();
-        footprint_ = costmap_ros->getRobotFootprint();
+        footprint_ = costmap_ros->getRobotFootprint(); //
 
         rclcpp::QoS smooth_qos(10);
         smooth_client_ = rclcpp_action::create_client<nav2_msgs::action::SmoothPath>(node_.get(), "smooth_path");
 
-        rclcpp::QoS latching_qos(1);
-        latching_qos.transient_local(); //
-        
-        raw_path_pub_ = node_->create_publisher<nav_msgs::msg::Path>(
-            "/raw_plan", latching_qos);
+
+        rclcpp::QoS plan_publisher_qos(rclcpp::KeepLast(1));
+        plan_publisher_qos.transient_local(); 
+        plan_publisher_qos.reliable(); 
+
+        // Tạo topic có tên "~/raw_plan" (sẽ thành /planner_server/raw_plan hoặc tương tự)
+        raw_path_pub_ = node_->create_publisher<nav_msgs::msg::Path>("raw_plan", plan_publisher_qos);
+        // ---------------------
     }
 
     void AStarPlanner_Smoother::activate() {}
@@ -107,8 +110,7 @@ namespace nhatbot_planning
                     continue;
 
                 auto cell_cost = costmap_->getCost(new_node.x, new_node.y);
-                // RCLCPP_INFO(node_->get_logger(), "Checking node (%d, %d) with cost %u", new_node.x, new_node.y, cell_cost);
-                if(cell_cost >= nav2_costmap_2d::LETHAL_OBSTACLE)  // ~~ if(cell_cost == nav2_costmap_2d::LETHAL_OBSTACLE || cell_cost == nav2_costmap_2d::NO_INFORMATION)
+                if(cell_cost >= nav2_costmap_2d::LETHAL_OBSTACLE)  
                     continue;
 
                 unsigned int cell_idx = poseToCell(new_node);
@@ -145,7 +147,11 @@ namespace nhatbot_planning
         }
         std::reverse(path.poses.begin(), path.poses.end());
 
-        raw_path_pub_->publish(path);  // Publish raw path before smoothing
+        // raw_path_pub_->publish(path);  // Publish raw path before smoothing
+
+        if (raw_path_pub_->get_subscription_count() > 0) {
+            raw_path_pub_->publish(path);
+        }
 
         if(smooth_client_->action_server_is_ready()) {
             
