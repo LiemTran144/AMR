@@ -9,10 +9,12 @@ This repository hosts the complete source code for a full-stack Autonomous Mobil
 
 ### 1. Control & Telemetry System (Foundation Project)
 *Showcasing the custom PyQt Dashboard for real-time monitoring, database logging, manual control, and waypoints tracking via Modbus RTU.*
+
 [![Control System Demo](https://img.youtube.com/vi/QExMpKI5Sls/0.jpg)](https://youtu.be/QExMpKI5Sls)
 
 ### 2. Advanced Navigation (Capstone Project)
 *Demonstrating Global Path Planning with a custom A* Plugin, Local Trajectory Optimization with DWA, and Dynamic Obstacle Avoidance.*
+
 [![Control System Demo](https://img.youtube.com/vi/Si51abrtMTA/0.jpg)](https://youtu.be/Si51abrtMTA)
 
 ---
