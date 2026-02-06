@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "rosbasic_msgs__py",
+		"source" : "/home/liemtran/liem_ws/src/build/rosbasic_msgs/rosbasic_msgs__py"
+	}
+}

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="3">
+  <BehaviorTree ID="MainTree">
+    <PipelineSequence name="NavigateWithReplanning">
+      <RateController hz="1">
+        <RecoveryNode name="ComputePathToPoseWithRecovery"
+                      number_of_retries="1">
+          <ComputePathToPose goal="{goal}"
+                             start=""
+                             planner_id="GridBased_A_Star"
+                             server_name=""
+                             server_timeout=""
+                             path="{path}"/>
+          <ClearEntireCostmap name="ClearGlobalCostmap"
+                              service_name="global_costmap/clear_entirely_global_costmap"
+                              server_timeout=""/>
+        </RecoveryNode>
+      </RateController>
+      <RecoveryNode name="FollowPathWithRecovery"
+                    number_of_retries="1">
+        <FollowPath controller_id="FollowPath_DWB"
+                    path="{path}"
+                    goal_checker_id=""
+                    server_name=""
+                    server_timeout=""/>
+        <ClearEntireCostmap name="ClearLocalCostmap"
+                            service_name="local_costmap/clear_entirely_local_costmap"
+                            server_timeout=""/>
+      </RecoveryNode>
+    </PipelineSequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="ClearEntireCostmap">
+      <input_port name="service_name">Service name</input_port>
+      <input_port name="server_timeout">Server timeout</input_port>
+    </Action>
+    <Action ID="ComputePathToPose">
+      <input_port name="goal">Destination to plan to</input_port>
+      <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
+      <input_port name="planner_id">Mapped name to the planner plugin type to use</input_port>
+      <input_port name="server_name">Server name</input_port>
+      <input_port name="server_timeout">Server timeout</input_port>
+      <output_port name="path">Path created by ComputePathToPose node</output_port>
+    </Action>
+    <Action ID="FollowPath">
+      <input_port name="controller_id"
+                  default="FollowPath"/>
+      <input_port name="path">Path to follow</input_port>
+      <input_port name="goal_checker_id">Goal checker</input_port>
+      <input_port name="server_name">Server name</input_port>
+      <input_port name="server_timeout">Server timeout</input_port>
+    </Action>
+    <Control ID="PipelineSequence"/>
+    <Decorator ID="RateController">
+      <input_port name="hz">Rate</input_port>
+    </Decorator>
+    <Control ID="RecoveryNode">
+      <input_port name="number_of_retries">Number of retries</input_port>
+    </Control>
+  </TreeNodesModel>
+
+</root>

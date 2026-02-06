@@ -1,0 +1,4 @@
+move_robot:
+  ros__parameters:
+    quangduong: 2
+    khoangcach: 0.5

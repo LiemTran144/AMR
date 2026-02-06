@@ -1,42 +1,92 @@
 controller_server:
   ros__parameters:
-    use_sim_time: false
-    controller_frequency: 10.0
+    controller_frequency: 20.0
     min_x_velocity_threshold: 0.001
-    min_y_velocity_threshold: 0.0
+    min_y_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
+    costmap_update_timeout: 0.3
     failure_tolerance: 0.3
-
-    # Important frame corrections
-    robot_base_frame: base_link # ✅ Fix TF error
-    odom_topic: /diff_drive_controller/odom # ✅ Local planner uses odom as global frame   /diff_drive_controller/odom
-
-    progress_checker_plugin: "progress_checker"
+    odom_topic: "/diff_drive_controller/odom"     # /nhatbot/odom   /diff_drive_controller/odom
+    progress_checker_plugins: ["progress_checker"]
     goal_checker_plugins: ["general_goal_checker"]
-    controller_plugins: ["FollowPath"]
-
-    # Progress checker parameters
+    odom_duration: 0.3
+    controller_plugins: ["FollowPath_DWB", "Window_Dynamic_PurePursuit", "Custom_DWA_Controller"]
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
-      required_movement_radius: 0.5
+      required_movement_radius: 0.05
       movement_time_allowance: 10.0
-
-    # Goal checker parameters
     general_goal_checker:
-      stateful: true
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
       yaw_goal_tolerance: 0.25
+      stateful: True
 
-    # FollowPath controller - DWB (Differential Drive)
-    FollowPath:
-      plugin: "dwb_core::DWBLocalPlanner"
+    Window_Dynamic_PurePursuit:
+      plugin: "nav2_rotation_shim_controller::RotationShimController"
+      # plugin: "liem_rotation_shim_controller::RotationShimController"
+      primary_controller: "nav2_dynamic_window_pure_pursuit_controller::DynamicWindowPurePursuitController" # change here to use DWPP plugin
+
+          # ---- Rotation Shim params ----
+      angular_dist_threshold: 0.3
+      forward_sampling_distance: 0.5
+      angular_disengage_threshold: 0.3925
+      rotate_to_heading_angular_vel: 0.5
+      max_angular_accel: 1.0
+      simulate_ahead_time: 1.0
+      rotate_to_goal_heading: false
+
+
+      max_linear_vel: 0.3 # DWPP parameter
+      min_linear_vel: 0.0 # DWPP parameter
+      max_angular_vel: 1.0 # DWPP parameter
+      min_angular_vel: -1.0 # DWPP parameter
+      max_linear_accel: 0.5 # DWPP parameter
+      max_linear_decel: -0.5 # DWPP parameter
+      # max_angular_accel: 1.0 # DWPP parameter
+      max_angular_decel: -1.0 # DWPP parameter
+      lookahead_dist: 0.6
+      min_lookahead_dist: 0.3
+      max_lookahead_dist: 0.9
+      lookahead_time: 1.5
+      transform_tolerance: 0.1
+      use_velocity_scaled_lookahead_dist: true # use adaptive pure pursuit
+      min_approach_linear_velocity: 0.05
+      approach_velocity_scaling_dist: 0.6
+      max_allowed_time_to_collision_up_to_carrot: 1.0
+      use_collision_detection: true
+      use_regulated_linear_velocity_scaling: true # use regulated pure pursuit
+      use_cost_regulated_linear_velocity_scaling: true # use regulated pure pursuit
+      cost_scaling_dist: 0.6
+      cost_scaling_gain: 1.0
+      inflation_cost_scaling_factor: 3.0
+      regulated_linear_scaling_min_radius: 0.9
+      regulated_linear_scaling_min_speed: 0.25
+      use_rotate_to_heading: true
+      rotate_to_heading_min_angle: 3.14 # OFF since DWPP can handle steep curvature
+      allow_reversing: false
+      use_interpolation: true
+    
+    FollowPath_DWB:
+      plugin: "nav2_rotation_shim_controller::RotationShimController"
+      primary_controller: "dwb_core::DWBLocalPlanner"
+
+      # ---- Rotation Shim params ----
+      angular_dist_threshold: 0.3
+      forward_sampling_distance: 0.5
+      angular_disengage_threshold: 0.3925
+      rotate_to_heading_angular_vel: 0.5
+      max_angular_accel: 1.0
+      simulate_ahead_time: 1.0
+      rotate_to_goal_heading: false
+
+      # ---- Primary controller (DWB) ----
+      # primary_controller: "DWB"
       debug_trajectory_details: True
       min_vel_x: 0.0
       min_vel_y: 0.0
-      max_vel_x: 0.4
+      max_vel_x: 0.5   #old:0.5
       max_vel_y: 0.0
-      max_vel_theta: 0.5
+      max_vel_theta: 1.0  #old:0.5
       min_speed_xy: 0.0
       max_speed_xy: 0.5
       min_speed_theta: 0.0
@@ -46,27 +96,21 @@ controller_server:
       decel_lim_x: -2.5
       decel_lim_y: 0.0
       decel_lim_theta: -3.2
-      vx_samples: 20
+      vx_samples: 50
       vy_samples: 5
       vtheta_samples: 20
-      sim_time: 1.7   
+      sim_time: 1.5
       linear_granularity: 0.05
       angular_granularity: 0.025
       transform_tolerance: 0.2
-      xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.05
       trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: True
       stateful: True
       critics:
-        [
-          "RotateToGoal",
-          "Oscillation",
-          "BaseObstacle",
-          "GoalAlign",
-          "PathAlign",
-          "PathDist",
-          "GoalDist",
-        ]
+        ["RotateToGoal", "Oscillation", "BaseObstacle",
+        "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+
       BaseObstacle.scale: 0.02
       PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1
@@ -77,3 +121,67 @@ controller_server:
       RotateToGoal.scale: 32.0
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
+
+
+    Custom_DWA_Controller:
+      plugin: "nav2_rotation_shim_controller::RotationShimController"
+      angular_dist_threshold: 0.3
+      forward_sampling_distance: 0.5
+      angular_disengage_threshold: 0.3925
+      rotate_to_heading_angular_vel: 0.5
+      max_angular_accel: 1.0
+      simulate_ahead_time: 1.0
+      rotate_to_goal_heading: false
+      primary_controller: "dwa_controller::DWA_Controller"    
+
+      max_vel_x: 0.4
+      min_vel_x: 0.0
+      max_vel_theta: 1.0
+      min_vel_theta: -1.0
+      acc_lim_x: 1.2
+      acc_lim_theta: 1.6
+      sim_time: 1.7   
+      sim_granularity: 0.05
+
+      scale_heading: 3.5
+      scale_obs: 2.0
+      scale_vel: 1.5
+      scale_align: 1.0
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      update_frequency: 5.0
+      publish_frequency: 2.0
+      global_frame: odom
+      robot_base_frame: base_link
+      use_sim_time: false
+      robot_radius: 0.255
+      resolution: 0.05
+      always_send_full_costmap: True
+      rolling_window: true
+      width: 5
+      height: 5
+
+      plugins: ["obstacle_layer", "inflation_layer"]
+
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: True
+        observation_sources: scan # observation source is the scan
+        scan: # Specific configuration
+          topic: /scan
+          data_type: "LaserScan"
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True # Enables the usage of the Bresenham algorithm that clears the cells of the map where no obstacles are detected
+          combination_method: 1
+          raytrace_max_range: 3.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 2.5
+          obstacle_min_range: 0.0
+
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.52 # At least >= robot_radius (55cm)

@@ -15,6 +15,13 @@ def generate_launch_description():
     twist_mux_pkg = get_package_share_directory('twist_mux')
     firmware_pkg_path = get_package_share_directory('nhatbot_firmware')
     path_planning_pkg = get_package_share_directory('path_planning')
+    controller_server_pkg = get_package_share_directory('liem_controller')
+
+
+    use_sim_time = LaunchConfiguration("use_sim_time")
+    use_sim_time_arg = DeclareLaunchArgument(
+        "use_sim_time",
+        default_value="false",)    
 
     use_rviz_arg = DeclareLaunchArgument(
         "use_rviz",
@@ -59,7 +66,7 @@ def generate_launch_description():
         package="nhatbot_twist_teleop",
         executable="twist_relay",
         name="twist_relay",
-        # parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}]
+        parameters=[{"use_sim_time": use_sim_time}],
         )
     
     # Twist Teleop node
@@ -95,7 +102,7 @@ def generate_launch_description():
             "config_topics": os.path.join(node_path, "config", "twist_mux_topics.yaml"),
             "config_locks": os.path.join(node_path, "config", "twist_mux_locks.yaml"),
             "config_joy":  os.path.join(node_path, "config", "twist_mux_joy.yaml"),
-            # "use_sim_time":  LaunchConfiguration("use_sim_time")
+            "use_sim_time":  use_sim_time,
         }.items()
     )
 
@@ -116,9 +123,15 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(
                 path_planning_pkg,'launch','path_planning.launch.py')))
     
+    controller_server_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(
+                controller_server_pkg,'launch','liem_controller.launch.py')))
+    
+    
     return LaunchDescription([
         rviz_arg,
         use_rviz_arg,
+        use_sim_time_arg,
         rviz_node,
         joy_node,
         # speed_control,
@@ -135,4 +148,5 @@ def generate_launch_description():
         # safety_stop,
         hw_interface_launch,
         path_planning_launch,
+        controller_server_launch,
     ])

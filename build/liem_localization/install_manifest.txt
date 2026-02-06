@@ -1,0 +1,15 @@
+/home/liemtran/liem_ws/src/install/liem_localization/share/ament_index/resource_index/package_run_dependencies/liem_localization
+/home/liemtran/liem_ws/src/install/liem_localization/share/ament_index/resource_index/parent_prefix_path/liem_localization
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/environment/ament_prefix_path.sh
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/environment/ament_prefix_path.dsv
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/environment/path.sh
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/environment/path.dsv
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/local_setup.bash
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/local_setup.sh
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/local_setup.zsh
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/local_setup.dsv
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/package.dsv
+/home/liemtran/liem_ws/src/install/liem_localization/share/ament_index/resource_index/packages/liem_localization
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/cmake/liem_localizationConfig.cmake
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/cmake/liem_localizationConfig-version.cmake
+/home/liemtran/liem_ws/src/install/liem_localization/share/liem_localization/package.xml

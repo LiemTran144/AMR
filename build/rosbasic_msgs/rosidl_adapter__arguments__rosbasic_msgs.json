@@ -1,0 +1,7 @@
+{
+  "package_name": "rosbasic_msgs",
+  "non_idl_tuples": [
+    "/home/liemtran/liem_ws/src/rosbasic_msgs:srv/AddTwoInts.srv",
+    "/home/liemtran/liem_ws/src/rosbasic_msgs:srv/Multi.srv"
+  ]
+}

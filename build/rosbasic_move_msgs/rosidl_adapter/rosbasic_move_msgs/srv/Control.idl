@@ -1,0 +1,23 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosbasic_move_msgs/srv/Control.srv
+// generated code does not contain a copyright notice
+
+
+module rosbasic_move_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Request")
+    struct Control_Request {
+      float quangduong;
+
+      float khoangcach;
+    };
+    @verbatim (language="comment", text=
+      "Response")
+    struct Control_Response {
+      boolean success;
+
+      string notification;
+    };
+  };
+};

@@ -1,0 +1,7 @@
+{
+  "package_name": "lidar_msgs",
+  "non_idl_tuples": [
+    "/home/liemtran/liem_ws/src/oleros2/src/lidar_msgs:srv/GetMetadata.srv",
+    "/home/liemtran/liem_ws/src/oleros2/src/lidar_msgs:msg/Metadata.msg"
+  ]
+}

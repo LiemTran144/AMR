@@ -72,5 +72,36 @@
         "cfenv": "cpp",
         "queue": "cpp"
     },
-    "cmake.ignoreCMakeListsMissing": true
+    "cmake.ignoreCMakeListsMissing": true,
+    "ROS2.distro": "humble",
+    "python.autoComplete.extraPaths": [
+        "/home/liemtran/liem_ws/src/install/rosbasic_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/src/install/rosbasic_move_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/src/install/lidar_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/install/rosbasic_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/install/rosbasic_move_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/install/lidar_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/turtlebot3_ws/install/turtlebot3_teleop/lib/python3.10/site-packages",
+        "/home/liemtran/turtlebot3_ws/install/turtlebot3_example/lib/python3.10/site-packages",
+        "/home/liemtran/turtlebot3_ws/install/turtlebot3_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/turtlebot3_ws/install/dynamixel_sdk_custom_interfaces/local/lib/python3.10/dist-packages",
+        "/home/liemtran/turtlebot3_ws/install/dynamixel_sdk/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/liemtran/liem_ws/src/install/rosbasic_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/src/install/rosbasic_move_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/src/install/lidar_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/install/rosbasic_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/install/rosbasic_move_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/liem_ws/install/lidar_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/turtlebot3_ws/install/turtlebot3_teleop/lib/python3.10/site-packages",
+        "/home/liemtran/turtlebot3_ws/install/turtlebot3_example/lib/python3.10/site-packages",
+        "/home/liemtran/turtlebot3_ws/install/turtlebot3_msgs/local/lib/python3.10/dist-packages",
+        "/home/liemtran/turtlebot3_ws/install/dynamixel_sdk_custom_interfaces/local/lib/python3.10/dist-packages",
+        "/home/liemtran/turtlebot3_ws/install/dynamixel_sdk/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
 }

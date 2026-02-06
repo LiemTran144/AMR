@@ -1,0 +1,115 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-a9b40fd836a5174eecae.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "nhatbot_firmware",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "nhatbot_firmware::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nhatbot_firmware-56bd9bcce2a07ea1bc24.json",
+					"name" : "nhatbot_firmware",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nhatbot_firmware_sensor::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nhatbot_firmware_sensor-684eb80f508055e747d1.json",
+					"name" : "nhatbot_firmware_sensor",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nhatbot_firmware_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nhatbot_firmware_uninstall-9805f19f454fefbe491a.json",
+					"name" : "nhatbot_firmware_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nhatbot_sensor_broadcaster::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nhatbot_sensor_broadcaster-a2ad3a33c98d6bc4275b.json",
+					"name" : "nhatbot_sensor_broadcaster",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-a2d6eab31b5dd84eb0ae.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "zlac_driver_node::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-zlac_driver_node-412cddf128b5d9426350.json",
+					"name" : "zlac_driver_node",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "zlac_sdk::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-zlac_sdk-0d067e158175c70cb103.json",
+					"name" : "zlac_sdk",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/liemtran/liem_ws/src/build/nhatbot_firmware",
+		"source" : "/home/liemtran/liem_ws/src/nhatbot_firmware"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

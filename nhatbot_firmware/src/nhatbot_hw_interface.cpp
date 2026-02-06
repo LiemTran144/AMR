@@ -44,9 +44,13 @@ namespace nhatbot_interface
             return CallbackReturn::FAILURE;
         }
 
+
+
         velocity_commands_.resize(info_.joints.size(), 0.0);
         position_states_.resize(info_.joints.size(), 0.0);
         velocity_states_.resize(info_.joints.size(), 0.0);
+        
+
         last_run_ = rclcpp::Clock().now();
 
         return CallbackReturn::SUCCESS;

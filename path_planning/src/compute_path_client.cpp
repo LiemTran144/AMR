@@ -31,9 +31,9 @@ void ComputePathClient::goalCallback(const geometry_msgs::msg::PoseStamped::Shar
 
     auto goal = ComputePathToPose::Goal();
     goal.goal = *msg;
-    goal.planner_id = "GridBased"; 
+    goal.planner_id = "GridBased_A_Star";    // 'GridBased_A_Star','GridBased_Theta_Star_nav2','GridBased_Smac_nav2'
 
-    RCLCPP_INFO(this->get_logger(),"Sending goal to compute_path_to_pose: (%.2f, %.2f)",msg->pose.position.x, msg->pose.position.y);
+    RCLCPP_INFO(this->get_logger(),"Sending goal to %s: (%.2f, %.2f)", goal.planner_id.c_str(), msg->pose.position.x, msg->pose.position.y);
 
     client_->async_send_goal(goal);
 }

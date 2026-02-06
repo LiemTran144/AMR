@@ -10,10 +10,9 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    use_sim_time = LaunchConfiguration("use_sim_time")
     lifecycle_nodes = [ "controller_server" ]
     controller_pkg = get_package_share_directory("liem_controller")
-
+    use_sim_time = LaunchConfiguration("use_sim_time")
     use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
         default_value="false",)
@@ -35,6 +34,7 @@ def generate_launch_description():
                 controller_pkg,
                 "config",
                 "controller.yaml"),
+                # "dwa_config.yaml"),
             {"use_sim_time": use_sim_time}],
         remappings=[
             ("/cmd_vel", "/nav/cmd_vel")],
@@ -54,7 +54,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         use_sim_time_arg,
-        path_follower_client_node,
+        # path_follower_client_node,
         controller_server,
         nav2_lifecycle_manager,
     ])

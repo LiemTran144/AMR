@@ -1,0 +1,2 @@
+ScanToCloudFilterChain;lib/liblaser_filter_chains.so
+ScanToScanFilterChain;lib/liblaser_filter_chains.so

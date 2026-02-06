@@ -1,0 +1,88 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-e3aeff1e68d11507fb0a.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "ros2_lidar",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "lidar_driver::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lidar_driver-45fef37d373c61bbc2ff.json",
+					"name" : "lidar_driver",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lidar_driver_core::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lidar_driver_core-5f229283e48013fcfd33.json",
+					"name" : "lidar_driver_core",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ros2_lidar_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ros2_lidar_uninstall-20d099f77478a0215367.json",
+					"name" : "ros2_lidar_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-a593ae887fb2d2fee8d9.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/liemtran/liem_ws/src/build/ros2_lidar",
+		"source" : "/home/liemtran/liem_ws/src/oleros2/src/ros2_lidar"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

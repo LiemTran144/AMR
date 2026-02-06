@@ -1,0 +1,16 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from lidar_msgs/srv/GetMetadata.srv
+// generated code does not contain a copyright notice
+
+#include "lidar_msgs/msg/Metadata.idl"
+
+module lidar_msgs {
+  module srv {
+    struct GetMetadata_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    struct GetMetadata_Response {
+      lidar_msgs::msg::Metadata metadata;
+    };
+  };
+};

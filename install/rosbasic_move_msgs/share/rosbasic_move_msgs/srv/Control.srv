@@ -1,0 +1,7 @@
+# Request
+float32 quangduong
+float32 khoangcach
+---
+# Response
+bool success
+string notification

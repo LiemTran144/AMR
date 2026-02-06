@@ -1,0 +1,233 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-6a7459f5a9a73921e93a.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17
+					]
+				},
+				{
+					"build" : "rosbasic_msgs__py",
+					"jsonFile" : "directory-rosbasic_msgs__py-c0cf8279cfa91aa69c57.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/home/liemtran/liem_ws/src/build/rosbasic_msgs/rosbasic_msgs__py",
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1
+					],
+					"name" : "rosbasic_msgs",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ament_cmake_python_build_rosbasic_msgs_egg::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ament_cmake_python_build_rosbasic_msgs_egg-a55bdc1d37516b4939b2.json",
+					"name" : "ament_cmake_python_build_rosbasic_msgs_egg",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ament_cmake_python_copy_rosbasic_msgs::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ament_cmake_python_copy_rosbasic_msgs-9226d50c5c72580e7dca.json",
+					"name" : "ament_cmake_python_copy_rosbasic_msgs",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs-bacdfc6221aec95f29ae.json",
+					"name" : "rosbasic_msgs",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__cpp-ddae074c0cc503be8fa4.json",
+					"name" : "rosbasic_msgs__cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "rosbasic_msgs__py::@e77a0b8acdd096497818",
+					"jsonFile" : "target-rosbasic_msgs__py-eab1b79d4a02d3e09f2e.json",
+					"name" : "rosbasic_msgs__py",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_generator_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_generator_c-5f4049331a0ae8df81e9.json",
+					"name" : "rosbasic_msgs__rosidl_generator_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_generator_py::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_generator_py-4da7b8dbe140399408bc.json",
+					"name" : "rosbasic_msgs__rosidl_generator_py",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_typesupport_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_typesupport_c-57a5b498832a12c32840.json",
+					"name" : "rosbasic_msgs__rosidl_typesupport_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_typesupport_c__pyext::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_typesupport_c__pyext-0648162808f95cfa012a.json",
+					"name" : "rosbasic_msgs__rosidl_typesupport_c__pyext",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_typesupport_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_typesupport_cpp-210174032ce108751cac.json",
+					"name" : "rosbasic_msgs__rosidl_typesupport_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_typesupport_fastrtps_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_typesupport_fastrtps_c-7d5b5d4ac8e8f31433fb.json",
+					"name" : "rosbasic_msgs__rosidl_typesupport_fastrtps_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_typesupport_fastrtps_c__pyext::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_typesupport_fastrtps_c__pyext-2f2d69c7e2fcb623a9c3.json",
+					"name" : "rosbasic_msgs__rosidl_typesupport_fastrtps_c__pyext",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_typesupport_fastrtps_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_typesupport_fastrtps_cpp-ce7589426c60fb50f55c.json",
+					"name" : "rosbasic_msgs__rosidl_typesupport_fastrtps_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_typesupport_introspection_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_typesupport_introspection_c-e116d62fbfea9cf710d3.json",
+					"name" : "rosbasic_msgs__rosidl_typesupport_introspection_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_typesupport_introspection_c__pyext::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_typesupport_introspection_c__pyext-834ad11e6590da30a003.json",
+					"name" : "rosbasic_msgs__rosidl_typesupport_introspection_c__pyext",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs__rosidl_typesupport_introspection_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs__rosidl_typesupport_introspection_cpp-98963cfbb00a9676545e.json",
+					"name" : "rosbasic_msgs__rosidl_typesupport_introspection_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rosbasic_msgs_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rosbasic_msgs_uninstall-08aae39b525334e9632b.json",
+					"name" : "rosbasic_msgs_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-e65b6051945a809ab9c5.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/liemtran/liem_ws/src/build/rosbasic_msgs",
+		"source" : "/home/liemtran/liem_ws/src/rosbasic_msgs"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

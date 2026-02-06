@@ -1,0 +1,115 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-5165f37d5b76d010f17e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "liem_controller",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "dwa_controller::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-dwa_controller-a8cd2067df64a9aa2673.json",
+					"name" : "dwa_controller",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "liem_controller_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-liem_controller_uninstall-06a66a36569474027888.json",
+					"name" : "liem_controller_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nav2_dynamic_window_pure_pursuit_controller::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nav2_dynamic_window_pure_pursuit_controller-381bc4786613a6bf5193.json",
+					"name" : "nav2_dynamic_window_pure_pursuit_controller",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "path_follower_node::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-path_follower_node-f5287e69936c09524707.json",
+					"name" : "path_follower_node",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pd_control_remake::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pd_control_remake-170527144e0a128f5bcb.json",
+					"name" : "pd_control_remake",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pd_motion_planner::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pd_motion_planner-5f74e946b0a6d51d754f.json",
+					"name" : "pd_motion_planner",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-25a061316bb196c7fec9.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/liemtran/liem_ws/src/build/liem_controller",
+		"source" : "/home/liemtran/liem_ws/src/liem_controller"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

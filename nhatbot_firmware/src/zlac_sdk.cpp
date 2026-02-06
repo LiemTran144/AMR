@@ -4,6 +4,7 @@
 #include <cerrno>
 #include <chrono>
 #include <thread>
+#include <ostream>
 
 namespace zlac_modbus
 {
@@ -198,12 +199,14 @@ bool  ZLAC8015D_SDK::setDecelTime(int left_ms, int right_ms)
 {
 
     std::vector<uint16_t> values = {static_cast<uint16_t>(left_ms),static_cast<uint16_t>(right_ms)};
-    return writeRegisters(zlac::R_ACL_TIME, values);
+
+    return writeRegisters(zlac::L_DCL_TIME, values);
 }
 
 bool ZLAC8015D_SDK::setAccelTime(int left_ms, int right_ms)
 {
     std::vector<uint16_t> values = {static_cast<uint16_t>(left_ms),static_cast<uint16_t>(right_ms)};
+    std::cerr << "❌ Invalid slave ID\n";
     return writeRegisters(zlac::L_ACL_TIME, values);
 }
 
@@ -239,13 +242,6 @@ bool ZLAC8015D_SDK::setRPM(int left_rpm, int right_rpm)
     int16_t left  = std::clamp(left_rpm,  -max_rpm_, max_rpm_);
     int16_t right = std::clamp(right_rpm, -max_rpm_, max_rpm_);
 
-    // // Đảo bên (swap)
-    // int16_t tmp = left;
-    // left  = right;
-    // right = tmp;
-
-
-    // left = -left;
 
 
     std::vector<uint16_t> values = {static_cast<uint16_t>(left),  static_cast<uint16_t>(-right)};

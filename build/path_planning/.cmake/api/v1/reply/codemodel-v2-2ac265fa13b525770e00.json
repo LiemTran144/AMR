@@ -1,0 +1,106 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-7ff0ff30417c3d4937e8.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "path_planning",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "a_star_nav2_planner::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-a_star_nav2_planner-a246625e9c3b2cb751bb.json",
+					"name" : "a_star_nav2_planner",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "a_star_nav2_smoother::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-a_star_nav2_smoother-759ce5ca2180dd40cad4.json",
+					"name" : "a_star_nav2_smoother",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "a_star_planner_costmap::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-a_star_planner_costmap-c73e087a1805d4452c21.json",
+					"name" : "a_star_planner_costmap",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "compute_path_client::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-compute_path_client-aa29362aa243e7e74d7d.json",
+					"name" : "compute_path_client",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "path_planning_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-path_planning_uninstall-c5f981bb6566001ded07.json",
+					"name" : "path_planning_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-d3d6956d850c5311340b.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/liemtran/liem_ws/src/build/path_planning",
+		"source" : "/home/liemtran/liem_ws/src/path_planning"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

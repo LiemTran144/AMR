@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<library path="liem_rotation_shim_controller">   
+  <class type="liem_rotation_shim_controller::RotationShimController" base_class_type="nav2_core::Controller">
+    <description>
+      liem_rotation_shim_controller
+    </description>
+  </class>
+</library>

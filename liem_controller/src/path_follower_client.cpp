@@ -104,21 +104,20 @@
 
 #include "liem_controller/path_follower_client.hpp"
 #include <chrono>
-#include <functional> // Quan trọng để dùng std::bind
+#include <functional> 
 
 namespace liem_controller
 {
 
 PathFollower::PathFollower(const rclcpp::NodeOptions & options): Node("path_follower_node", options)
 {
-    // create action client to /follow_path
     client_ = rclcpp_action::create_client<FollowPath>(
         this, "follow_path");
 
-    // subscribe path from /plan (output cua A*)
     sub_path_ = this->create_subscription<nav_msgs::msg::Path>(
         "/plan", 10,
         std::bind(&PathFollower::pathCallback, this, std::placeholders::_1));
+        
 }
 
 void PathFollower::pathCallback(const nav_msgs::msg::Path::SharedPtr msg)
@@ -131,7 +130,7 @@ void PathFollower::pathCallback(const nav_msgs::msg::Path::SharedPtr msg)
 
     auto goal = FollowPath::Goal();
     goal.path = *msg;
-    goal.controller_id = "FollowPath";
+    goal.controller_id = "Custom_DWA_Controller"; // 'FollowPath_DWB','Custom_DWA_Controller','Window_Dynamic_PurePursuit'
     goal.goal_checker_id = "general_goal_checker";
 
     RCLCPP_INFO(this->get_logger(), "Received Path with %zu poses. Sending to Controller...", msg->poses.size());
@@ -165,9 +164,11 @@ void PathFollower::goal_response_callback(const GoalHandleFollowPath::SharedPtr 
 void PathFollower::feedback_callback(GoalHandleFollowPath::SharedPtr, const std::shared_ptr<const FollowPath::Feedback> feedback)
 {
     // Throttle log để không bị spam màn hình
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000, 
-        "Speed: %.2f m/s, Dist to goal: %.2f m", 
-        feedback->speed, feedback->distance_to_goal);
+    // RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000, 
+    //     "Speed: %.2f m/s, Dist to goal: %.2f m", 
+    //     feedback->speed, feedback->distance_to_goal);
+    (void)  feedback;
+
 }
 
 void PathFollower::result_callback(const GoalHandleFollowPath::WrappedResult & result)

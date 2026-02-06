@@ -1,0 +1,22 @@
+controller .launch
+->remapping 
+
+dwa_config.yaml
+-> local_costmap: robot radius, inflation radius
+-> odom_topic: sua lai diff_drive_controller/odom
+
+provide_map .launch
+-> map.yaml  , use sim time
+
+diff_drive_controller .yaml
+-> wheel radius, seperation
+
+
+
+bringup .launch, p
+-> use sim time  -> doi lai FALSE
+
+
+planner_server .yaml
+-> inflation radius: sua lai 0.55
+

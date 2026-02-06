@@ -1,0 +1,6 @@
+{
+  "package_name": "rosbasic_move_msgs",
+  "non_idl_tuples": [
+    "/home/liemtran/liem_ws/src/rosbasic_move_msgs:srv/Control.srv"
+  ]
+}

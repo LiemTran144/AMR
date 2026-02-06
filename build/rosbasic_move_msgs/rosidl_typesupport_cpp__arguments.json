@@ -1,0 +1,17 @@
+{
+  "package_name": "rosbasic_move_msgs",
+  "output_dir": "/home/liemtran/liem_ws/src/build/rosbasic_move_msgs/rosidl_typesupport_cpp/rosbasic_move_msgs",
+  "template_dir": "/opt/ros/humble/share/rosidl_typesupport_cpp/resource",
+  "idl_tuples": [
+    "/home/liemtran/liem_ws/src/build/rosbasic_move_msgs/rosidl_adapter/rosbasic_move_msgs:srv/Control.idl"
+  ],
+  "target_dependencies": [
+    "/opt/ros/humble/lib/rosidl_typesupport_cpp/rosidl_typesupport_cpp",
+    "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_typesupport_cpp/__init__.py",
+    "/opt/ros/humble/share/rosidl_typesupport_cpp/resource/action__type_support.cpp.em",
+    "/opt/ros/humble/share/rosidl_typesupport_cpp/resource/idl__type_support.cpp.em",
+    "/opt/ros/humble/share/rosidl_typesupport_cpp/resource/msg__type_support.cpp.em",
+    "/opt/ros/humble/share/rosidl_typesupport_cpp/resource/srv__type_support.cpp.em",
+    "/home/liemtran/liem_ws/src/build/rosbasic_move_msgs/rosidl_adapter/rosbasic_move_msgs/srv/Control.idl"
+  ]
+}

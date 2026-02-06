@@ -1,0 +1,9 @@
+setup.py
+rosbasic_msgs/__init__.py
+rosbasic_msgs.egg-info/PKG-INFO
+rosbasic_msgs.egg-info/SOURCES.txt
+rosbasic_msgs.egg-info/dependency_links.txt
+rosbasic_msgs.egg-info/top_level.txt
+rosbasic_msgs/srv/__init__.py
+rosbasic_msgs/srv/_add_two_ints.py
+rosbasic_msgs/srv/_multi.py

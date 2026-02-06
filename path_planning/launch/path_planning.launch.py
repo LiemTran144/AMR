@@ -76,7 +76,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         a_star_planner_costmap_node,
-        compute_path_client_node,
+        # compute_path_client_node,
         use_sim_time_arg,
         nav2_planner_server,
         nav2_smoother_server,

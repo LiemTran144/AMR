@@ -1,0 +1,93 @@
+controller_server:
+  ros__parameters:
+    use_sim_time: false
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.0
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.3
+
+    # Important frame corrections
+    robot_base_frame: base_link 
+    odom_topic: /odom    #   /diff_drive_controller/odom
+
+    progress_checker_plugin: "progress_checker"
+    goal_checker_plugins: ["general_goal_checker"]
+    controller_plugins: ["FollowPath"]
+
+    # Progress checker parameters
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"  # for checking if the robot is stuck
+      required_movement_radius: 0.5
+      movement_time_allowance: 10.0
+
+    # Goal checker parameters
+    general_goal_checker:
+      stateful: true
+      plugin: "nav2_controller::SimpleGoalChecker"      # for checking if the robot reached its goal
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.25
+
+    FollowPath:
+      # plugin: "nav2_rotation_shim_controller::RotationShimController"
+      # angular_dist_threshold: 0.2
+      # forward_sampling_distance: 0.3
+      # rotate_to_heading_angular_vel: 1.8
+      # max_angular_accel: 3.2
+      # simulate_ahead_time: 1.0
+      # rotate_to_goal_heading: false
+      plugin: "dwa_controller::DWA_Controller"    
+
+      max_vel_x: 0.4
+      min_vel_x: 0.0
+      max_vel_theta: 1.0
+      min_vel_theta: -1.0
+      acc_lim_x: 1.2
+      acc_lim_theta: 1.6
+      sim_time: 1.7   
+      sim_granularity: 0.05
+
+      scale_heading: 3.5
+      scale_obs: 2.0
+      scale_vel: 1.5
+      scale_align: 1.0
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      update_frequency: 5.0
+      publish_frequency: 2.0
+      global_frame: odom
+      robot_base_frame: base_link
+      use_sim_time: false
+      # robot_radius: 0.255
+      robot_radius: 0.1 # Turtlebot3 radius
+      resolution: 0.05
+      always_send_full_costmap: True
+      rolling_window: true
+      width: 3
+      height: 3
+
+      plugins: ["obstacle_layer", "inflation_layer"]
+
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: True
+        observation_sources: scan # observation source is the scan
+        scan: # Specific configuration
+          topic: /scan_filtered
+          data_type: "LaserScan"
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True # Enables the usage of the Bresenham algorithm that clears the cells of the map where no obstacles are detected
+          combination_method: 1
+          raytrace_max_range: 3.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 2.5
+          obstacle_min_range: 0.0
+
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        # inflation_radius: 0.52 # At least >= robot_radius (55cm)
+        inflation_radius: 0.2 # Turtlebot3

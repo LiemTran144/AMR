@@ -1,0 +1,4 @@
+source;share/nhatbot_twist_teleop/local_setup.bash
+source;share/nhatbot_twist_teleop/local_setup.dsv
+source;share/nhatbot_twist_teleop/local_setup.sh
+source;share/nhatbot_twist_teleop/local_setup.zsh
