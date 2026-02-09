@@ -105,7 +105,3 @@ This project was developed as part of my engineering coursework at **Eastern Int
 **Contact:** Tran Trung Liem  
 **LinkedIn:** [linkedin.com/in/liem-tran2003](https://www.linkedin.com/in/liem-tran2003)  
 **Email:** liem.trantrung2003@gmail.com
-<<<<<<< HEAD
-=======
-
->>>>>>> 27aa00c (Update controller and navigator)
