@@ -242,6 +242,7 @@ class RobotUI(QMainWindow):
         self.error_plot_curve.setData([], [])
         self.curve_setpoint.setData([], [])
         self.curve_current.setData([], [])
+        self.replanned_Path.setData([], [])
 
     def plot_setpoint(self, file_path):
         """Load and plot setpoints from CSV."""

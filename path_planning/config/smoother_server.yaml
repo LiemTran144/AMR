@@ -6,5 +6,5 @@ smoother_server:
     simple_smoother:
       plugin: "nav2_smoother::SimpleSmoother"
       tolerance: 1.0e-10 
-      max_its: 1000 
+      max_its: 1000  
       do_refinement: true

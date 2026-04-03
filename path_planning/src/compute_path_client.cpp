@@ -8,36 +8,36 @@ namespace compute_path_client
 
 ComputePathClient::ComputePathClient(const rclcpp::NodeOptions & options)
 : Node("compute_path_client", options)
-{
-    // create action client to /compute_path_to_pose
-    client_ = rclcpp_action::create_client<ComputePathToPose>(
-        this, "/compute_path_to_pose");
+    {
+        // create action client to /compute_path_to_pose
+        client_ = rclcpp_action::create_client<ComputePathToPose>(
+            this, "/compute_path_to_pose");
 
-    // subscribe goal from /goal_pose
-    sub_goal_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
-        "/goal_pose", 10,
-        std::bind(&ComputePathClient::goalCallback, this, std::placeholders::_1));
+        // subscribe goal from /goal_pose
+        sub_goal_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
+            "/goal_pose", 10,
+            std::bind(&ComputePathClient::goalCallback, this, std::placeholders::_1));
 
-    RCLCPP_INFO(this->get_logger(), "ComputePathClient started");
-}
-
-void ComputePathClient::goalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
-{
-    // wait for action server
-    if (!client_->wait_for_action_server(std::chrono::seconds(2))) {
-        RCLCPP_ERROR(this->get_logger(), "ComputePathToPose action server not available");
-        return;
+        RCLCPP_INFO(this->get_logger(), "ComputePathClient started");
     }
 
-    auto goal = ComputePathToPose::Goal();
-    goal.goal = *msg;
-    goal.planner_id = "GridBased_A_Star";    // 'GridBased_A_Star','GridBased_Theta_Star_nav2','GridBased_Smac_nav2'
+    void ComputePathClient::goalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
+    {
+        // wait for action server
+        if (!client_->wait_for_action_server(std::chrono::seconds(2))) {
+            RCLCPP_ERROR(this->get_logger(), "ComputePathToPose action server not available");
+            return;
+        }
 
-    RCLCPP_INFO(this->get_logger(),"Sending goal to %s: (%.2f, %.2f)", goal.planner_id.c_str(), msg->pose.position.x, msg->pose.position.y);
+        auto goal = ComputePathToPose::Goal();
+        goal.goal = *msg;
+        goal.planner_id = "GridBased_Theta_Star_nav2";    
+        // 'GridBased_A_Star','GridBased_Theta_Star_nav2','GridBased_Smac_nav2'  "A_Star_Report"
 
-    client_->async_send_goal(goal);
-}
+        RCLCPP_INFO(this->get_logger(),"Sending goal to %s: (%.2f, %.2f)", goal.planner_id.c_str(), msg->pose.position.x, msg->pose.position.y);
 
+        client_->async_send_goal(goal);
+    }
 } 
 
 int main(int argc, char ** argv)

@@ -3,6 +3,7 @@
 #include "nav2_core/exceptions.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "tf2/utils.h"
+#include "nav2_util/geometry_utils.hpp"
 
 using nav2_util::declare_parameter_if_not_declared;
 
@@ -27,80 +28,106 @@ void DWA_Controller::configure(
   costmap_ = costmap_ros_->getCostmap();
   logger_ = node->get_logger();
 
-  // Khai báo tham số
+  RCLCPP_INFO(logger_, "Configuring DWA Controller: %s", plugin_name_.c_str());
+
   declare_parameter_if_not_declared(node, plugin_name_ + ".max_vel_x", rclcpp::ParameterValue(0.5));
   declare_parameter_if_not_declared(node, plugin_name_ + ".min_vel_x", rclcpp::ParameterValue(0.0));
   declare_parameter_if_not_declared(node, plugin_name_ + ".max_vel_theta", rclcpp::ParameterValue(1.0));
   declare_parameter_if_not_declared(node, plugin_name_ + ".min_vel_theta", rclcpp::ParameterValue(-1.0));
+  declare_parameter_if_not_declared(node, plugin_name_ + ".min_in_place_vel_theta", rclcpp::ParameterValue(0.4));
+  
   declare_parameter_if_not_declared(node, plugin_name_ + ".acc_lim_x", rclcpp::ParameterValue(2.5));
   declare_parameter_if_not_declared(node, plugin_name_ + ".acc_lim_theta", rclcpp::ParameterValue(3.2));
+  
   declare_parameter_if_not_declared(node, plugin_name_ + ".sim_time", rclcpp::ParameterValue(1.7));
   declare_parameter_if_not_declared(node, plugin_name_ + ".sim_granularity", rclcpp::ParameterValue(0.05));
   declare_parameter_if_not_declared(node, plugin_name_ + ".controller_frequency", rclcpp::ParameterValue(20.0));
+  
   declare_parameter_if_not_declared(node, plugin_name_ + ".scale_heading", rclcpp::ParameterValue(32.0));
   declare_parameter_if_not_declared(node, plugin_name_ + ".scale_obs", rclcpp::ParameterValue(24.0));
   declare_parameter_if_not_declared(node, plugin_name_ + ".scale_vel", rclcpp::ParameterValue(0.5));
   declare_parameter_if_not_declared(node, plugin_name_ + ".scale_align", rclcpp::ParameterValue(10.0));
+
+  declare_parameter_if_not_declared(node, plugin_name_ + ".xy_goal_tolerance", rclcpp::ParameterValue(0.25));
+  declare_parameter_if_not_declared(node, plugin_name_ + ".yaw_goal_tolerance", rclcpp::ParameterValue(0.1));
+  declare_parameter_if_not_declared(node, plugin_name_ + ".rotate_to_heading_min_angle", rclcpp::ParameterValue(0.785)); // 45 do
   declare_parameter_if_not_declared(node, plugin_name_ + ".robot_base_frame", rclcpp::ParameterValue("base_link"));
 
-  // Lấy giá trị tham số
   node->get_parameter(plugin_name_ + ".max_vel_x", max_vel_x_);
   node->get_parameter(plugin_name_ + ".min_vel_x", min_vel_x_);
   node->get_parameter(plugin_name_ + ".max_vel_theta", max_vel_theta_);
   node->get_parameter(plugin_name_ + ".min_vel_theta", min_vel_theta_);
+  node->get_parameter(plugin_name_ + ".min_in_place_vel_theta", min_in_place_vel_theta_);
+
   node->get_parameter(plugin_name_ + ".acc_lim_x", acc_lim_x_);
   node->get_parameter(plugin_name_ + ".acc_lim_theta", acc_lim_theta_);
+  
   node->get_parameter(plugin_name_ + ".sim_time", sim_time_);
   node->get_parameter(plugin_name_ + ".sim_granularity", sim_granularity_);
   node->get_parameter(plugin_name_ + ".controller_frequency", controller_frequency_);
+  
   node->get_parameter(plugin_name_ + ".scale_heading", scale_heading_);
   node->get_parameter(plugin_name_ + ".scale_obs", scale_obs_);
   node->get_parameter(plugin_name_ + ".scale_vel", scale_vel_);
   node->get_parameter(plugin_name_ + ".scale_align", scale_align_);
+
+  node->get_parameter(plugin_name_ + ".xy_goal_tolerance", xy_goal_tolerance_);
+  node->get_parameter(plugin_name_ + ".yaw_goal_tolerance", yaw_goal_tolerance_);
+  node->get_parameter(plugin_name_ + ".rotate_to_heading_min_angle", rotate_to_heading_min_angle_);
+  
   node->get_parameter(plugin_name_ + ".robot_base_frame", robot_base_frame_);
   
   global_frame_ = costmap_ros_->getGlobalFrameID();
 
-  // Khởi tạo công cụ check va chạm (Template chính xác cho Humble)
   collision_checker_ = std::make_unique<nav2_costmap_2d::FootprintCollisionChecker<nav2_costmap_2d::Costmap2D *>>(costmap_);
 
   local_plan_pub_ = node->create_publisher<nav_msgs::msg::Path>("local_plan", 1);
-  global_pub_ = node->create_publisher<nav_msgs::msg::Path>("received_global_plan", 1);
-  predict_traj_pub_ = node->create_publisher<nav_msgs::msg::Path>("predict_trajectory", 1);
-  
-  RCLCPP_INFO(logger_, "DWA Controller Configured!");
+  marker_pub_ = node->create_publisher<visualization_msgs::msg::MarkerArray>("trajectory_markers", 1);
 }
 
 void DWA_Controller::activate()
 {
+  RCLCPP_INFO(logger_, "Activating DWA Controller");
   local_plan_pub_->on_activate();
-  global_pub_->on_activate();
-  predict_traj_pub_->on_activate();
+  marker_pub_->on_activate();
+  current_state_ = ControlState::INITIAL_CHECK; 
 }
 
 void DWA_Controller::deactivate()
 {
+  RCLCPP_INFO(logger_, "Deactivating DWA Controller");
   local_plan_pub_->on_deactivate();
-  global_pub_->on_deactivate();
-  predict_traj_pub_->on_deactivate();
+  marker_pub_->on_deactivate();
 }
 
 void DWA_Controller::cleanup()
 {
+  RCLCPP_INFO(logger_, "Cleaning up DWA Controller");
   local_plan_pub_.reset();
-  global_pub_.reset();
-  predict_traj_pub_.reset();
+  marker_pub_.reset();
   collision_checker_.reset();
 }
 
 void DWA_Controller::setSpeedLimit(const double & speed_limit, const bool & percentage)
 {
-  (void)speed_limit; (void)percentage;
+  if (percentage) {
+    max_vel_x_ *= speed_limit;
+    min_vel_x_ *= speed_limit;
+    max_vel_theta_ *= speed_limit;
+    min_vel_theta_ *= speed_limit;
+  } else {
+    max_vel_x_ = speed_limit;
+    if (min_vel_x_ > max_vel_x_) {
+        min_vel_x_ = 0.0;
+    }
+  }
 }
 
 void DWA_Controller::setPlan(const nav_msgs::msg::Path & path)
 {
   global_plan_ = path;
+  current_state_ = ControlState::INITIAL_CHECK;
+  RCLCPP_INFO(logger_, "New plan received. State reset to INITIAL_CHECK.");
 }
 
 geometry_msgs::msg::TwistStamped DWA_Controller::computeVelocityCommands(
@@ -108,158 +135,194 @@ geometry_msgs::msg::TwistStamped DWA_Controller::computeVelocityCommands(
   const geometry_msgs::msg::Twist & velocity,
   nav2_core::GoalChecker * goal_checker)
 {
-  // 1. Khóa Costmap để an toàn luồng
-  std::lock_guard<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(costmap_->getMutex()));
-
   geometry_msgs::msg::TwistStamped cmd_vel;
   cmd_vel.header.frame_id = robot_base_frame_;
   cmd_vel.header.stamp = rclcpp::Clock().now();
 
+  if (global_plan_.poses.empty()) return cmd_vel;
 
-  double raw_obs;
-  double norm_obs;
-  double raw_goal;
-  double raw_align;
-  double norm_vel;
-
-
-  // 2. Cắt và Biến đổi đường dẫn toàn cục về Local Frame
-  std::vector<geometry_msgs::msg::PoseStamped> local_plan;
-  try {
-    local_plan = transformGlobalPlan(pose);
-  } catch (const nav2_core::PlannerException & e) {
-    RCLCPP_ERROR(logger_, "Could not transform plan: %s", e.what());
-    return cmd_vel; 
+  // 1. Goal Checker 
+  if (goal_checker->isGoalReached(pose.pose, global_plan_.poses.back().pose, velocity)) {
+    cmd_vel.twist.linear.x = 0.0;
+    cmd_vel.twist.angular.z = 0.0;
+    RCLCPP_INFO(logger_, "GOAL REACHED! Stopping.");
+    return cmd_vel;
   }
 
-  // Visualize Local Plan
-  if (local_plan_pub_->get_subscription_count() > 0 && !local_plan.empty()) {
+  // // Get Robot Pose
+  geometry_msgs::msg::PoseStamped current_robot_pose; 
+  if (!costmap_ros_->getRobotPose(current_robot_pose))  
+  {
+      return cmd_vel;
+  }
+  
+  geometry_msgs::msg::PoseStamped final_goal_pose = global_plan_.poses.back();
+  try {
+    // Chuyển đổi điểm đích cuối cùng sang global_frame_ (thường là odom hoặc map)
+    geometry_msgs::msg::TransformStamped transform = tf_->lookupTransform(
+      global_frame_, global_plan_.header.frame_id, tf2::TimePointZero);
+    tf2::doTransform(final_goal_pose, final_goal_pose, transform);
+
+
+  } catch (tf2::TransformException & ex) {
+    RCLCPP_ERROR(logger_, "Goal transform failed: %s", ex.what());
+    return cmd_vel;
+  }
+
+
+  // double dist_to_goal = std::hypot(
+  //     last_pose.pose.position.x - final_goal_pose.pose.position.x,
+  //     last_pose.pose.position.y - final_goal_pose.pose.position.y);
+
+  // if (dist_to_goal < xy_goal_tolerance_) {
+  //     cmd_vel.twist.linear.x = 0.0;
+  //     cmd_vel.twist.angular.z = 0.0;
+  //     RCLCPP_INFO(logger_, "Reach Goal!");
+  //     return cmd_vel;
+  // }
+
+  // Transform Plan
+  std::vector<geometry_msgs::msg::PoseStamped> local_plan;
+  try {
+    local_plan = transformGlobalPlan(current_robot_pose);
+  } catch (const nav2_core::PlannerException & e) {
+    RCLCPP_ERROR(logger_, "Could not transform plan: %s", e.what());
+    return cmd_vel;                                
+  }
+
+  // if (local_plan_pub_->get_subscription_count() > 0 && !local_plan.empty()) {
+  if (!local_plan.empty()) {
     nav_msgs::msg::Path local_path;
     local_path.header = local_plan.front().header;
     local_path.poses = local_plan;
     local_plan_pub_->publish(local_path);
   }
 
-  // 3. Kiểm tra đến đích
-  if (global_plan_.poses.empty()) return cmd_vel;
-  
-  if (goal_checker->isGoalReached(pose.pose, global_plan_.poses.back().pose, velocity)) {
-    cmd_vel.twist.linear.x = 0.0;
-    cmd_vel.twist.angular.z = 0.0;
-    RCLCPP_INFO(logger_, "GOAL REACHED!");
-    return cmd_vel;
-  }
 
-  // 4. Tính toán Cửa sổ động (Dynamic Window)
-  auto [min_v, max_v, min_w, max_w] = computeDynamicWindow(velocity);
+  double heading_error;
+  double target_yaw;
 
-  // 5. Lấy mẫu và Tìm kiếm (Sampling & Search)
-  double best_score = 1e9;
-  double best_v = 0.0;
-  double best_w = 0.0;
-  bool found_valid_traj = false;
+  if (!local_plan.empty()) {
+      double lookahead_x = local_plan.front().pose.position.x - current_robot_pose.pose.position.x;
+      double lookahead_y = local_plan.front().pose.position.y - current_robot_pose.pose.position.y;
 
-  double v_sample_step = 0.01; 
-  double w_sample_step = 0.01;
-
-  for (double v = min_v; v <= max_v; v += v_sample_step) {
-    for (double w = min_w; w <= max_w; w += w_sample_step) {
-      
-      // Chấm điểm
-      double score = scoreTrajectory(v, w, local_plan);
-
-      if (score == -1.0) continue; // Va chạm -> Bỏ qua
-
-      if (score < best_score) {
-        best_score = score;
-        best_v = v;
-        best_w = w;
-        found_valid_traj = true;
+      if (std::hypot(lookahead_x, lookahead_y) < 0.1 && local_plan.size() > 5) {
+          lookahead_x = local_plan[5].pose.position.x - current_robot_pose.pose.position.x;
+          lookahead_y = local_plan[5].pose.position.y - current_robot_pose.pose.position.y;
       }
-    }
+      target_yaw = std::atan2(lookahead_y, lookahead_x);
+      double current_yaw = tf2::getYaw(current_robot_pose.pose.orientation);
+      heading_error = angles::shortest_angular_distance(current_yaw, target_yaw);
+  }
+
+  if (current_state_ == ControlState::INITIAL_CHECK) {
+      if (std::abs(heading_error) > rotate_to_heading_min_angle_) {
+          current_state_ = ControlState::ROTATING;
+          RCLCPP_INFO(logger_, "Heading error %.2f > Threshold. Switching to ROTATING.", heading_error);
+      } else {
+          current_state_ = ControlState::FOLLOWING;
+          RCLCPP_INFO(logger_, "Heading error %.2f is small. Skipping rotation. Switching to FOLLOWING.", heading_error);
+      }
   }
 
 
-  RCLCPP_INFO_THROTTLE(logger_, *node_.lock()->get_clock(), 1000,
-            "\n>>> BEST (v=%.2f, w=%.2f) TOTAL: %.3f\n"
-            "   + OBS:   %.3f (Raw: %.0f, Norm: %.2f * Scale %.1f)\n"
-            "   + VEL:   %.3f (Raw: %.2f, Norm: %.2f * Scale %.1f)\n"
-            "   + ALIGN: %.3f (Raw: %.2fm * Scale %.1f)\n"
-            "   + GOAL:  %.3f (Raw: %.2fm * Scale %.1f)",
-            best_v, best_w, best_score,
-            (norm_obs * scale_obs_), raw_obs, norm_obs, scale_obs_,
-            (norm_vel * scale_vel_), best_v, norm_vel, scale_vel_,
-            (raw_align * scale_align_), raw_align, scale_align_,
-            (raw_goal * scale_heading_), raw_goal, scale_heading_
-        );
+
+  if (current_state_ == ControlState::ROTATING) {
+      if (std::abs(heading_error) < yaw_goal_tolerance_) {
+          current_state_ = ControlState::FOLLOWING;
+          RCLCPP_INFO(logger_, "Aligned (Error %.2f). Switching to FOLLOWING (DWA).", heading_error);
+      }
+  }
 
   
+  // CASE: ROTATING
+  if (current_state_ == ControlState::ROTATING) {
+      if (rotateToHeading(target_yaw, current_robot_pose, cmd_vel, yaw_goal_tolerance_)) {
+          return cmd_vel;
+      } else {
 
-  // 6. Xử lý kết quả
-  if (found_valid_traj) {
-    cmd_vel.twist.linear.x = best_v;
-    cmd_vel.twist.angular.z = best_w;
+          RCLCPP_WARN(logger_, "Rotation blocked by collision! Forcing switch to FOLLOWING.");
+          current_state_ = ControlState::FOLLOWING;
+      }
+  }
 
-    // --- [VISUALIZE] VẼ QUỸ ĐẠO DỰ ĐOÁN LÊN RVIZ ---
-    if (predict_traj_pub_->get_subscription_count() > 0) {
-        geometry_msgs::msg::PoseStamped current_pose_vis;
-        costmap_ros_->getRobotPose(current_pose_vis);
-        auto best_traj = simulateTrajectory(current_pose_vis, best_v, best_w);
+  // CASE: FOLLOWING 
+  if (current_state_ == ControlState::FOLLOWING) {
+      auto [min_v, max_v, min_w, max_w] = computeDynamicWindow(velocity);
 
-        nav_msgs::msg::Path traj_msg;
-        traj_msg.header.frame_id = costmap_ros_->getGlobalFrameID();
-        traj_msg.header.stamp = rclcpp::Clock().now();
-        traj_msg.poses = best_traj;
-        predict_traj_pub_->publish(traj_msg);
-    }
+      double best_score = -1e9;
+      double best_v = 0.0;
+      double best_w = 0.0;
+      bool found_valid_traj = false;
 
-    // --- [DEBUG LOG] IN RA CHI TIẾT ĐIỂM SỐ (1s/lần) ---
-    static rclcpp::Time last_print = rclcpp::Clock().now();
-    if ((rclcpp::Clock().now() - last_print).seconds() > 1.0) {
-        last_print = rclcpp::Clock().now();
+      double v_sample_step = 0.05; 
+      double w_sample_step = 0.05;
+      
+      std::lock_guard<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(costmap_->getMutex()));
 
-        // Tái tạo lại các thông số để in log (Tính xuôi, không tính ngược)
-        geometry_msgs::msg::PoseStamped current_pose_debug;
-        costmap_ros_->getRobotPose(current_pose_debug);
-        auto traj_debug = simulateTrajectory(current_pose_debug, best_v, best_w);
-
-        // a. Obs Cost
-        raw_obs = checkTrajectoryCollision(traj_debug);
-        norm_obs = raw_obs / 254.0; // Normalize
-        
-        // b. Align Cost
-        auto last_pose = traj_debug.back();
-        raw_align = 1e9;
-        for (const auto & p : local_plan) {
-            double d = std::hypot(last_pose.pose.position.x - p.pose.position.x,
-                                  last_pose.pose.position.y - p.pose.position.y);
-            if(d < raw_align) raw_align = d;
+      for (double v = min_v; v <= max_v; v += v_sample_step) {
+        for (double w = min_w; w <= max_w; w += w_sample_step) {
+          double score = scoreTrajectory(v, w, local_plan, current_robot_pose, final_goal_pose);
+          if (score < 0.0) continue; 
+          if (score > best_score) {
+            best_score = score;
+            best_v = v;
+            best_w = w;
+            found_valid_traj = true;
+          }
         }
-        
-        // c. Goal Cost
-        raw_goal = 0.0;
-        if(!local_plan.empty()){
-            raw_goal = std::hypot(last_pose.pose.position.x - local_plan.back().pose.position.x,
-                                  last_pose.pose.position.y - local_plan.back().pose.position.y);
-        }
+      }
 
-        // d. Vel Cost
-        norm_vel = (max_vel_x_ - best_v) / max_vel_x_;
-        if(norm_vel < 0) norm_vel = 0;
+      if (found_valid_traj) {
+        cmd_vel.twist.linear.x = best_v;
+        cmd_vel.twist.angular.z = best_w;
 
-
-    }
-    // ---------------------------------------------------
-
-  } else {
-    RCLCPP_WARN_THROTTLE(logger_, *node_.lock()->get_clock(), 1000, 
-      "DWA failed to find a valid trajectory! Robot stops.");
-    cmd_vel.twist.linear.x = 0.0;
-    cmd_vel.twist.angular.z = 0.0;
+      } else {
+        RCLCPP_WARN_THROTTLE(logger_, *node_.lock()->get_clock(), 2000, 
+          "DWA failed! Robot stops.");
+        cmd_vel.twist.linear.x = 0.0;
+        cmd_vel.twist.angular.z = 0.0;
+      }
   }
 
   return cmd_vel;
 }
+
+bool DWA_Controller::rotateToHeading(
+    double target_yaw, 
+    const geometry_msgs::msg::PoseStamped & current_pose,
+    geometry_msgs::msg::TwistStamped & cmd_vel,
+    double tolerance)
+{
+    double current_yaw = tf2::getYaw(current_pose.pose.orientation);
+    double diff = angles::shortest_angular_distance(current_yaw, target_yaw);
+
+    if (std::abs(diff) < tolerance) {
+        cmd_vel.twist.linear.x = 0.0;
+        cmd_vel.twist.angular.z = 0.0;
+        return true; 
+    }
+
+    double sign = (diff > 0) ? 1.0 : -1.0;
+    double vel = sign * std::min(std::abs(diff) * 0.6, max_vel_theta_); 
+    
+    if (std::abs(vel) < min_in_place_vel_theta_) {
+        vel = sign * min_in_place_vel_theta_;
+    }
+
+    std::lock_guard<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(costmap_->getMutex()));
+    auto traj = simulateTrajectory(current_pose, 0.0, vel); 
+    double cost = checkTrajectoryCollision(traj);
+
+    if (cost < 0.0) { 
+        return false; 
+    }
+
+    cmd_vel.twist.linear.x = 0.0;
+    cmd_vel.twist.angular.z = vel;
+    return true;
+}
+
 std::vector<geometry_msgs::msg::PoseStamped> DWA_Controller::transformGlobalPlan(
   const geometry_msgs::msg::PoseStamped & pose)
 {
@@ -267,10 +330,8 @@ std::vector<geometry_msgs::msg::PoseStamped> DWA_Controller::transformGlobalPlan
     throw nav2_core::PlannerException("Received plan with zero length");
   }
 
-  // Lấy tên frame của costmap (thường là "odom")
   std::string costmap_frame = costmap_ros_->getGlobalFrameID();
   
-  // Lấy transform từ Plan Frame -> Costmap Frame
   geometry_msgs::msg::TransformStamped plan_to_costmap_transform;
   try {
     plan_to_costmap_transform = tf_->lookupTransform(
@@ -281,17 +342,14 @@ std::vector<geometry_msgs::msg::PoseStamped> DWA_Controller::transformGlobalPlan
     throw nav2_core::PlannerException("Could not transform plan: " + std::string(ex.what()));
   }
 
-  // [FIX] Tự thực hiện transform và prune thủ công để tránh lỗi thư viện
   std::vector<geometry_msgs::msg::PoseStamped> transformed_plan;
   
-  // 1. Transform toàn bộ points
   for (const auto & global_pose : global_plan_.poses) {
     geometry_msgs::msg::PoseStamped local_pose;
     tf2::doTransform(global_pose, local_pose, plan_to_costmap_transform);
     transformed_plan.push_back(local_pose);
   }
 
-  // 2. Tìm điểm gần robot nhất để cắt bỏ phần đường cũ (Pruning)
   double min_dist = 1e9;
   size_t closest_index = 0;
   for (size_t i = 0; i < transformed_plan.size(); ++i) {
@@ -304,15 +362,13 @@ std::vector<geometry_msgs::msg::PoseStamped> DWA_Controller::transformGlobalPlan
     }
   }
 
-  // 3. Chỉ lấy các điểm từ robot trở đi (cộng thêm một khoảng dự phòng)
   std::vector<geometry_msgs::msg::PoseStamped> final_plan;
-  for (size_t i = closest_index; i < transformed_plan.size(); ++i) {
+  size_t lookahead_dist = 50; 
+  for (size_t i = closest_index; i < transformed_plan.size() && i < closest_index + lookahead_dist; ++i) {
     final_plan.push_back(transformed_plan[i]);
-    // Giới hạn độ dài plan cục bộ (ví dụ: lấy 50 điểm hoặc 2-3 mét tới)
-    if (final_plan.size() > 100) break; 
   }
 
-  if (final_plan.empty()) return transformed_plan; // Fallback
+  if (final_plan.empty()) return transformed_plan; 
   return final_plan;
 }
 
@@ -345,16 +401,19 @@ std::vector<geometry_msgs::msg::PoseStamped> DWA_Controller::simulateTrajectory(
   double theta = tf2::getYaw(current_pose.pose.orientation);
 
   double dt = sim_granularity_;
-  
-  for (double time = 0.0; time < sim_time_; time += dt) {
+  int steps = std::ceil(sim_time_ / dt);
+
+  for (int i = 0; i < steps; ++i) {
     x += v * cos(theta) * dt;
     y += v * sin(theta) * dt;
     theta += w * dt;
 
     geometry_msgs::msg::PoseStamped p;
-    p.header = current_pose.header;
+    p.header.frame_id = current_pose.header.frame_id;
+    p.header.stamp = current_pose.header.stamp; 
     p.pose.position.x = x;
     p.pose.position.y = y;
+    p.pose.position.z = 0.0;
     
     tf2::Quaternion q;
     q.setRPY(0, 0, theta);
@@ -369,8 +428,9 @@ double DWA_Controller::checkTrajectoryCollision(
   const std::vector<geometry_msgs::msg::PoseStamped> & trajectory)
 {
   if (trajectory.empty()) return 0.0;
-  
+
   std::vector<geometry_msgs::msg::Point> footprint = costmap_ros_->getRobotFootprint();
+  
   double max_cost = 0.0;
 
   for (const auto & pose : trajectory) {
@@ -380,39 +440,45 @@ double DWA_Controller::checkTrajectoryCollision(
 
     double cost = collision_checker_->footprintCostAtPose(x, y, theta, footprint);
 
-    if (cost == nav2_costmap_2d::LETHAL_OBSTACLE || 
-        cost == nav2_costmap_2d::INSCRIBED_INFLATED_OBSTACLE || 
-        cost == nav2_costmap_2d::NO_INFORMATION) {
+    if (cost == nav2_costmap_2d::NO_INFORMATION) {
+        continue; 
+    }
+
+    if (cost == nav2_costmap_2d::LETHAL_OBSTACLE) {
       return -1.0; 
     }
+
     if (cost > max_cost) max_cost = cost;
   }
   return max_cost;
 }
 
+
 double DWA_Controller::scoreTrajectory(
   const double v, 
   const double w, 
-  const std::vector<geometry_msgs::msg::PoseStamped> & local_plan)
+  const std::vector<geometry_msgs::msg::PoseStamped> & local_plan,
+  const geometry_msgs::msg::PoseStamped & current_pose,
+  const geometry_msgs::msg::PoseStamped & final_goal_pose)
 {
-  // 1. Mô phỏng quỹ đạo
-  geometry_msgs::msg::PoseStamped current_pose;
-  if (!costmap_ros_->getRobotPose(current_pose)) return -1.0;
   
   auto trajectory = simulateTrajectory(current_pose, v, w);
 
-  // 2. Kiểm tra va chạm
+  // RCLCPP_INFO_THROTTLE(logger_, *node_.lock()->get_clock(), 1000,
+  //   "Simulated Trajectory for v=%.2f m/s, w=%.2f rad/s with %zu poses.",
+  //   v, w, trajectory.size());
+  // publish_trajectories({trajectory});
+
+
+  // 1. Obstacle Cost
   double obs_raw_cost = checkTrajectoryCollision(trajectory);
-  if (obs_raw_cost < 0.0) return -1.0; // Va chạm -> Loại bỏ ngay
+  if (obs_raw_cost < 0.0) return -1.0; 
 
-  // --- [FIX QUAN TRỌNG] CHUẨN HÓA CÁC GIÁ TRỊ VỀ 0.0 -> 1.0 ---
+  double normalized_obs_cost = obs_raw_cost / 254.0; 
 
-  // a. Chuẩn hóa Obstacle Cost (Chia cho giá trị Max của Costmap là 254)
-  // Giá trị giờ đây sẽ từ 0.0 (an toàn) -> 1.0 (sát vật cản)
-  double normalized_obs_cost = obs_raw_cost / 254.0;
-
-  // b. Tính Alignment Cost (Khoảng cách lệch khỏi đường dẫn)
   auto last_pose = trajectory.back();
+
+  // 2. Alignment Cost
   double min_dist_to_path = 1e9;
   for (const auto & path_pose : local_plan) {
     double d = std::hypot(
@@ -420,31 +486,35 @@ double DWA_Controller::scoreTrajectory(
       last_pose.pose.position.y - path_pose.pose.position.y);
     if (d < min_dist_to_path) min_dist_to_path = d;
   }
-  // Alignment không có giới hạn trên rõ ràng, nhưng ta có thể giữ nguyên
-  // hoặc chia cho một ngưỡng chấp nhận được (ví dụ 1.0 mét)
-  double normalized_align_cost = min_dist_to_path; 
+  
+  // 3. Goal Cost 
+  double dist_to_goal = std::hypot(
+      last_pose.pose.position.x - final_goal_pose.pose.position.x,
+      last_pose.pose.position.y - final_goal_pose.pose.position.y);
 
-  // c. Tính Goal Cost (Khoảng cách tới đích cục bộ)
-  double dist_to_goal = 0.0;
-  if (!local_plan.empty()) {
-    dist_to_goal = std::hypot(
-      last_pose.pose.position.x - local_plan.back().pose.position.x,
-      last_pose.pose.position.y - local_plan.back().pose.position.y);
-  }
-  // Goal cost cũng có thể giữ nguyên vì đơn vị là mét (tương đồng với align)
+  // Compute Utility (Higher is better)
+  double utility_obs = 1.0 - normalized_obs_cost;
+  double utility_align = 1.0 / (1.0 + min_dist_to_path); 
+  double utility_goal = 1.0 / (1.0 + dist_to_goal);      
+  double utility_vel = v / max_vel_x_;                   
 
-  // d. Chuẩn hóa Velocity Cost (Chia cho Vận tốc tối đa)
-  // v càng gần max_vel thì cost càng gần 0. v=0 thì cost=1.0
-  double normalized_vel_cost = (max_vel_x_ - v) / max_vel_x_;
-  if (normalized_vel_cost < 0) normalized_vel_cost = 0; // Đề phòng v vượt max
+  double total_score = (scale_obs_ * utility_obs) + 
+                       (scale_align_ * utility_align) + 
+                       (scale_heading_ * utility_goal) + 
+                       (scale_vel_ * utility_vel);
 
-  // 3. TÍNH TỔNG CHI PHÍ
-  // Bây giờ các thành phần đều có trọng số tương đương nhau
-  return (scale_obs_ * normalized_obs_cost) + 
-         (scale_align_ * normalized_align_cost) + 
-         (scale_heading_ * dist_to_goal) + 
-         (scale_vel_ * normalized_vel_cost);
+  RCLCPP_INFO_THROTTLE(logger_, *node_.lock()->get_clock(), 1000,
+    "Window v:[%.2f, %.2f] w:[%.2f, %.2f] Traj (v=%.2f, w=%.2f): Score=%.2f [Obs:%.2f(%.0f), Align:%.2f(%.2fm), Goal:%.2f(%.2fm), Vel:%.2f]",
+    min_vel_x_, max_vel_x_, min_vel_theta_, max_vel_theta_,
+    v, w, total_score,
+    utility_obs * scale_obs_, obs_raw_cost,
+    utility_align * scale_align_, min_dist_to_path,
+    utility_goal * scale_heading_, dist_to_goal,
+    utility_vel * scale_vel_);
+  
+  return total_score;
 }
+
 
 
 } // namespace dwa_controller

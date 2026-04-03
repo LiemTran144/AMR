@@ -45,7 +45,7 @@ class PDMotionPlanner(Node):
 
 
 
-        self.declare_parameter("xy_goal_tolerance", 0.10)  # 15cm
+        self.declare_parameter("xy_goal_tolerance", 0.05)  # 15cm
         self.declare_parameter("yaw_goal_tolerance", 0.15) # ~3 độ
 
         # Get values
@@ -67,7 +67,7 @@ class PDMotionPlanner(Node):
         self.path_sub = self.create_subscription(Path, "/plan", self.path_callback, 10) 
 
         self.goal_sub = self.create_subscription(PoseStamped, '/goal_pose', self.goal_callback, 10)
-        self.cmd_pub = self.create_publisher(Twist, "/nav/cmd_vel", 10)
+        self.cmd_pub = self.create_publisher(Twist, "/cmd_vel", 10)
         self.next_pose_pub = self.create_publisher(PoseStamped, "/pd/next_pose", 10)
 
         # Control loop
@@ -260,8 +260,7 @@ class PDMotionPlanner(Node):
                 # Log để debug
                 # self.get_logger().info(f"Aligning Goal... Error: {math.degrees(yaw_error):.2f} deg")
 
-        # self.get_logger().info(f"}")
-        self.get_logger().info(f"Errors... Linear: {x:.3f}, Heading: {y:.3f}, Cmd Vel - Linear: {cmd_vel.linear.x:.3f}, Angular: {cmd_vel.angular.z:.3f}")
+        self.get_logger().info(f"In State: {self.current_state}. Errors... Linear: {x:.3f}, Heading: {y:.3f}, Cmd Vel - Linear: {cmd_vel.linear.x:.3f}, Angular: {cmd_vel.angular.z:.3f}")
         self.cmd_pub.publish(cmd_vel)
         self.last_cycle_time = self.get_clock().now()
 

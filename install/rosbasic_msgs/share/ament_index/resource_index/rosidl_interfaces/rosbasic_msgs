@@ -1,8 +1,0 @@
-srv/AddTwoInts.idl
-srv/AddTwoInts.srv
-srv/AddTwoInts_Request.msg
-srv/AddTwoInts_Response.msg
-srv/Multi.idl
-srv/Multi.srv
-srv/Multi_Request.msg
-srv/Multi_Response.msg

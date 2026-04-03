@@ -31,7 +31,7 @@ def generate_launch_description():
 
     rviz_arg = DeclareLaunchArgument(
         "rviz",
-        default_value=os.path.join(node_path, "rviz", "display_rviz.rviz"),
+        default_value=os.path.join(node_path, "rviz", "nav_through_poses.rviz"),  #  nav_through_poses  ,   display_rviz
         description="Path to RViz config file"
     )
    
@@ -44,8 +44,6 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration("use_rviz")) 
     )
 
-
-
     joy_node = Node(
         package="joy",
         executable="joy_node",
@@ -54,13 +52,11 @@ def generate_launch_description():
         parameters=[os.path.join(node_path, "config", "joy_config.yaml")],
     )
 
-    
     joy_teleop = Node(
         package="joy_teleop",
         executable="joy_teleop",
         parameters=[os.path.join(node_path, "config", "joy_teleop.yaml")],
     )
-
 
     twist_relay_node = Node(
         package="nhatbot_twist_teleop",

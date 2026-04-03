@@ -97,7 +97,6 @@ This project was developed as part of my engineering coursework at **Eastern Int
 * **Extensions & Contributions:** I significantly extended the base framework by:
     * Developing custom **Nav2 Plugins** (A* & DWA) from scratch in C++.
     * Integrating the **MySQL Database** and developing the **PyQt Control Dashboard**.
-    * Implementing the **Modbus RTU Driver** for ZLAC8015D integration.
 * **Open Source:** Special thanks to the ROS 2 and Navigation 2 communities.
 
 ---

@@ -80,7 +80,13 @@ target_include_directories(a_star_nav2_smoother
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
 )
 
-# export plugin description (make sure file exists)
+add_library(a_star_nav2_report SHARED src/a_star_report.cpp)
+ament_target_dependencies(a_star_nav2_report ${nav2_dependencies})
+target_include_directories(a_star_nav2_report
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
+)
+
+
 pluginlib_export_plugin_description_file(nav2_core global_planner_plugins.xml)
 
 install(TARGETS

@@ -6,9 +6,9 @@ from launch.substitutions import LaunchConfiguration
 import os
 
 def generate_launch_description():
-    # map_path = os.path.join(get_package_share_directory('robot_bringup'), 'map', 'new_map.yaml')
+    map_path = os.path.join(get_package_share_directory('robot_bringup'), 'map', 'new_map.yaml')
     # map_path = os.path.join(get_package_share_directory('robot_bringup'), 'map', 'map_turtlebot3.yaml')
-    map_path = os.path.join(get_package_share_directory('robot_bringup'), 'map', 'fablab_map.yaml')
+    # map_path = os.path.join(get_package_share_directory('robot_bringup'), 'map', 'fablab_map.yaml')
 
     amcl_config_path = os.path.join(get_package_share_directory('robot_bringup'), 'config', 'amcl_config.yaml')
     use_sim_time = LaunchConfiguration("use_sim_time")

@@ -17,7 +17,7 @@ controller_server:
       movement_time_allowance: 10.0
     general_goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.15
       yaw_goal_tolerance: 0.25
       stateful: True
 
@@ -67,17 +67,17 @@ controller_server:
       use_interpolation: true
     
     FollowPath_DWB:
-      plugin: "nav2_rotation_shim_controller::RotationShimController"
-      primary_controller: "dwb_core::DWBLocalPlanner"
+      # plugin: "nav2_rotation_shim_controller::RotationShimController"
+      plugin: "dwb_core::DWBLocalPlanner"
 
       # ---- Rotation Shim params ----
-      angular_dist_threshold: 0.3
-      forward_sampling_distance: 0.5
-      angular_disengage_threshold: 0.3925
-      rotate_to_heading_angular_vel: 0.5
-      max_angular_accel: 1.0
-      simulate_ahead_time: 1.0
-      rotate_to_goal_heading: false
+      # angular_dist_threshold: 0.3
+      # forward_sampling_distance: 0.5
+      # angular_disengage_threshold: 0.3925
+      # rotate_to_heading_angular_vel: 0.5
+      # max_angular_accel: 1.0
+      # simulate_ahead_time: 1.0
+      # rotate_to_goal_heading: false
 
       # ---- Primary controller (DWB) ----
       # primary_controller: "DWB"
@@ -103,7 +103,7 @@ controller_server:
       linear_granularity: 0.05
       angular_granularity: 0.025
       transform_tolerance: 0.2
-      xy_goal_tolerance: 0.05
+      xy_goal_tolerance: 0.15
       trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: True
       stateful: True
@@ -122,31 +122,25 @@ controller_server:
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
 
-
     Custom_DWA_Controller:
-      plugin: "nav2_rotation_shim_controller::RotationShimController"
-      angular_dist_threshold: 0.3
-      forward_sampling_distance: 0.5
-      angular_disengage_threshold: 0.3925
-      rotate_to_heading_angular_vel: 0.5
-      max_angular_accel: 1.0
-      simulate_ahead_time: 1.0
-      rotate_to_goal_heading: false
-      primary_controller: "dwa_controller::DWA_Controller"    
-
+      plugin: "dwa_controller::DWA_Controller"    
       max_vel_x: 0.4
       min_vel_x: 0.0
       max_vel_theta: 1.0
       min_vel_theta: -1.0
+      min_in_place_vel_theta: 0.4
       acc_lim_x: 1.2
       acc_lim_theta: 1.6
       sim_time: 1.7   
       sim_granularity: 0.05
-
-      scale_heading: 3.5
+      scale_heading: 1.5
       scale_obs: 2.0
-      scale_vel: 1.5
-      scale_align: 1.0
+      scale_vel: 2.0
+      scale_align: 2.0
+      xy_goal_tolerance: 0.15
+      yaw_goal_tolerance: 0.25
+      rotate_to_heading_min_angle: 0.785 # 45 độ
+      robot_base_frame: "base_link"
 
 local_costmap:
   local_costmap:

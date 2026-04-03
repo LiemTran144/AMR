@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="3">
+  <BehaviorTree ID="MainTree">
+    <PipelineSequence name="NavigateWithReplanning">
+        <ComputePathToPose goal="{goal}"
+                           planner_id="GridBased_A_Star"
+                           path="{path}"/>
+      <FollowPath controller_id="Custom_DWA_Controller"
+                  path="{path}"/>
+    </PipelineSequence>
+  </BehaviorTree>
+</root>

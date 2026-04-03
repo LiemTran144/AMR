@@ -7,16 +7,14 @@
         <RateController hz="1">
           <ComputePathToPose goal="{goal}"
                              planner_id="GridBased_A_Star"
-                             path="{path}"
-                             server_timeout=""/>
+                             path="{path}"/>
         </RateController>
-        <FollowPath controller_id="FollowPath_DWB"
-                    path="{path}"
-                    goal_checker_id=""
-                    server_timeout=""/>
+        <FollowPath controller_id="Custom_DWA_Controller"
+                    path="{path}"/>
       </PipelineSequence>
       <ClearEntireCostmap name="ClearGlobalCostmap"
                           service_name="global_costmap/clear_entirely_global_costmap"/>
     </RecoveryNode>
   </BehaviorTree>
+
 </root>

@@ -52,9 +52,17 @@ def generate_launch_description():
         ],
     )
 
+    compute_path_client_node = Node(
+        package='path_planning',
+        executable='compute_path_client',
+        name='compute_path_client',
+        output='screen',
+    )
+
     return LaunchDescription([
         use_sim_time_arg,
-        # path_follower_client_node,
+        path_follower_client_node,
+        compute_path_client_node,
         controller_server,
         nav2_lifecycle_manager,
     ])

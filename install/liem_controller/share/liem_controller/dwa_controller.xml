@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<library path="dwa_controller">   
-  <class type="dwa_controller::DWA_Controller" base_class_type="nav2_core::Controller">
-    <description>
-      custom_dwa_controller
-    </description>
-  </class>
-</library>

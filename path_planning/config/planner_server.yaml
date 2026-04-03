@@ -2,12 +2,15 @@ planner_server:
   ros__parameters:
     expected_planner_frequency: 1.0
     use_sim_time: false
-    planner_plugins: ['GridBased_A_Star','GridBased_Theta_Star_nav2','GridBased_Smac_nav2']
+    planner_plugins: ['GridBased_A_Star','GridBased_Theta_Star_nav2','GridBased_Smac_nav2', 'A_Star_Report']
 
     # A* Planner parameters
     GridBased_A_Star:
       # plugin: "nhatbot_planning::AStarPlanner"
-      plugin: "nhatbot_planning::AStarPlanner_Smoother"
+      plugin: "path_planning::AStarPlanner_Smoother"
+
+    A_Star_Report:
+      plugin: "path_planning::AStarPlanner_Report"
 
     GridBased_Theta_Star_nav2:
       plugin: "nav2_theta_star_planner/ThetaStarPlanner"
@@ -72,7 +75,6 @@ global_costmap:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
         inflation_radius: 0.55 # At least >= robot_radius (55cm)
-
         
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"

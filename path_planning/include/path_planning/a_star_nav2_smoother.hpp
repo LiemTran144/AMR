@@ -16,7 +16,7 @@
 #include "nav2_msgs/action/smooth_path.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
-namespace nhatbot_planning
+namespace path_planning
 {
 // struct GraphNode
 // {
@@ -96,7 +96,7 @@ class AStarPlanner_Smoother : public nav2_core::GlobalPlanner
         std::string name_;
         // nav2_costmap_2d::Costmap2D* costmap_ = nullptr;
 
-        rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr raw_path_pub_;
+        // rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr raw_path_pub_;
         
         bool poseOnMap(const GraphNode & node);
 

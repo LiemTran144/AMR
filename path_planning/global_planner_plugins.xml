@@ -5,6 +5,10 @@
     </library>
 
     <library path="a_star_nav2_smoother">
-        <class type="nhatbot_planning::AStarPlanner_Smoother" base_class_type="nav2_core::GlobalPlanner"></class>
+        <class type="path_planning::AStarPlanner_Smoother" base_class_type="nav2_core::GlobalPlanner"></class>
+    </library>
+
+    <library path="a_star_nav2_report">
+        <class type="path_planning::AStarPlanner_Report" base_class_type="nav2_core::GlobalPlanner"></class>
     </library>
 </class_libraries>

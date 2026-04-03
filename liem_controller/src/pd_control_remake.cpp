@@ -151,7 +151,7 @@ void PDControl::controlLoop()
     double local_y = robot_to_target_tf.getOrigin().y();
 
     double heading_error = std::atan2(local_y, local_x);   
-    double linear_error = std::hypot(local_x, local_y);
+    // double linear_error = std::hypot(local_x, local_y);
 
     // 5. Time Calculation
     rclcpp::Time current_time = this->now();
