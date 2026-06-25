@@ -7,15 +7,10 @@ This repository hosts the complete source code for a full-stack Autonomous Mobil
 
 ## 📺 Demo & Results
 
-### 1. Control & Telemetry System (Foundation Project)
-*Showcasing the custom PyQt Dashboard for real-time monitoring, database logging, manual control, and waypoints tracking via Modbus RTU.*
-
-[![Control System Demo](https://img.youtube.com/vi/QExMpKI5Sls/0.jpg)](https://youtu.be/QExMpKI5Sls)
-
-### 2. Advanced Navigation (Capstone Project)
+### Mobile Robot Path Planning based on A* and DWA Algorithms
 *Demonstrating Global Path Planning with a custom A* Plugin, Local Trajectory Optimization with DWA, and Dynamic Obstacle Avoidance.*
 
-[![Control System Demo](https://img.youtube.com/vi/Si51abrtMTA/0.jpg)](https://youtu.be/Si51abrtMTA)
+[![Mobile Robot Path Planning based on A* and DWA Algorithms](https://img.youtube.com/vi/iu3QfmCczRc/0.jpg)](https://youtu.be/iu3QfmCczRc)
 
 ---
 
@@ -47,7 +42,7 @@ This repository represents a continuous development process divided into two maj
 * **Tools:** Qt Designer, MySQL Workbench, RViz2, Gazebo
 
 ### Hardware Specs
-* **Computer:** NVIDIA Jetson Nano
+* **Computer:** NVIDIA Jetson TX2
 * **Sensors:** RPLidar A1 || OLEI 2D LR 1BS2
 * **Actuators:** ZLAC8015D Hub Servo Motors
 * **Chassis:** Differential Drive Configuration
